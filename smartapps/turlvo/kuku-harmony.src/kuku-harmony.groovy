@@ -574,7 +574,7 @@ def initializeChild(devicetype) {
 
 // For child Device
 def command(child, command) {
-    if ($selectedDevice != null) {
+    if (selectedDevice != null) {
         def device = getDeviceByName("$selectedDevice")
 
         log.debug "device>> childApp parent command(child)>>  $selectedDevice, command: $command, changed Command: ${state.selectedCommands[command]}"
@@ -586,7 +586,7 @@ def command(child, command) {
         if (result && result.message != "ok") {
             sendCommandToDevice(device.slug, commandSlug)
         }
-    } else if ($selectedActivity != null) {
+    } else if (selectedActivity != null) {
         log.debug "activity>> childApp parent command(child)>>  $selectedDevice, command: $command"
         def activity = []
         if (command == "power-on") {
@@ -595,7 +595,6 @@ def command(child, command) {
             activity = getActivityByName("PowerOff")
         }
 
-        log.debug "childApp parent command(child)>>  $selectedActivity, command: $command"
         def activitySlug = activity.slug
         log.debug "childApp parent command(child)>>  acitivitySlug : $activitySlug"
 
@@ -610,7 +609,7 @@ def command(child, command) {
 }
 
 def commandValue(child, command) {
-    if ($selectedDevice == null) {
+    if (selectedDevice == null) {
         log.debug "commandValue>> Something wrong..."
         return
     }
