@@ -567,7 +567,7 @@ def initializeChild(devicetype) {
         }
     } else {
         section() {
-            paragraph "Something wrong..."
+            paragraph "initializeChild>> Something wrong..."
         }
     }
 }
@@ -577,7 +577,7 @@ def command(child, command) {
     if ($selectedDevice != null) {
         def device = getDeviceByName("$selectedDevice")
 
-        log.debug "childApp parent command(child)>>  $selectedDevice, command: $command, changed Command: ${state.selectedCommands[command]}"
+        log.debug "device>> childApp parent command(child)>>  $selectedDevice, command: $command, changed Command: ${state.selectedCommands[command]}"
         def commandSlug = getSlugOfCommandByLabel(atomicState.deviceCommands, state.selectedCommands[command])
         log.debug "childApp parent command(child)>>  commandSlug : $commandSlug"
 
@@ -587,6 +587,7 @@ def command(child, command) {
             sendCommandToDevice(device.slug, commandSlug)
         }
     } else if ($selectedActivity != null) {
+        log.debug "activity>> childApp parent command(child)>>  $selectedDevice, command: $command"
         def activity = []
         if (command == "power-on") {
             activity = getActivityByName("$selectedActivity")
@@ -604,13 +605,13 @@ def command(child, command) {
             sendCommandToDevice(activity.slug, activitySlug)
         }
     } else {
-        log.debug "Something wrong..."
+        log.debug "command>> Something wrong..."
     }
 }
 
 def commandValue(child, command) {
     if ($selectedDevice == null) {
-        log.debug "Something wrong..."
+        log.debug "commandValue>> Something wrong..."
         return
     }
 
