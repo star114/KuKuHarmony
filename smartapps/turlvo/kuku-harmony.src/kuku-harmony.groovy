@@ -788,23 +788,6 @@ def sendCommandToDevice_response(resp) {
     log.debug("sendCommandToDevice_response >> $body")
 }
 
-// --------------------------------
-// ------- HubAction Methos -------
-// sendCommandToActivity
-// parameter :
-// - activity : target activity
-// - command : on/off
-// return : 'sendCommandToActivity_response()' method callback
-def sendCommandToActivity(device, command) {
-    log.debug("sendCommandToActivity >> harmonyApiServerIP : ${parent.getHarmonyApiServerIP()}")
-    sendHubCommand(setHubAction(parent.getHarmonyApiServerIP(), "/hubs/$atomicState.hub/devices/$device/commands/$command", "sendCommandToDevice_response"))
-}
-
-def sendCommandToDevice_response(resp) {
-    def result = []
-    def body = new groovy.json.JsonSlurper().parseText(parseLanMessage(resp.description).body)
-    log.debug("sendCommandToDevice_response >> $body")
-}
 // getHubStatus
 // parameter :
 // return : 'getHubStatus_response()' method callback
@@ -933,7 +916,7 @@ def discoverActivities_response(resp) {
     if(body) {
         body.devices.each {
             log.debug "discoverActivities_response: $it.id, $it.label, $it.slug, $it.isAVActivity"
-            def activity = ['id' : it.id, 'label' : it.label, 'slug' : it.slug, 'isAVActivity" : it.isAVActivity]
+            def activity = ['id' : it.id, 'label' : it.label, 'slug' : it.slug, 'isAVActivity' : it.isAVActivity]
             result.add(activity)
         }
     }
