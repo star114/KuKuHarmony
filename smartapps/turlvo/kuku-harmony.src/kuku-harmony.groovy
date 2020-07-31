@@ -18,9 +18,9 @@
  *
  *  Version history
  */
-def version() {	return "v1.6.501" }
+def version() { return "v1.6.501" }
 /*
- *	03/28/2017 >>> v1.0.000 - Release first KuKu Harmony supports only on/off command for each device
+ *  03/28/2017 >>> v1.0.000 - Release first KuKu Harmony supports only on/off command for each device
  *  04/13/2017 >>> v1.3.000 - Added Aircon, Fan, Roboking device type
  *  04/14/2017 >>> v1.4.000 - Added TV device type
  *  04/21/2017 >>> v1.4.100 - changed DTH's default state to 'Off'
@@ -31,7 +31,7 @@ def version() {	return "v1.6.501" }
  *  05/19/2017 >>> v1.5.002 - fixed 'STB' device type crash bug and changed refresh interval
  *  05/22/2017 >>> v1.5.102 - added routine of synchronizing device status through plug's power monitoring
  *  07/09/2017 >>> v1.5.103 - changed child app to use parent Harmony API server IP address
- *  07/29/2017 >>> v1.5.104 - fixed duplicated custom command 
+ *  07/29/2017 >>> v1.5.104 - fixed duplicated custom command
  *  08/30/2017 >>> v1.6.000 - added Harmony API server's IP changing menu and contact sensor's monitoring at Aircon Type
  *  09/03/2017 >>> v1.6.001 - hot fix - not be changed by IP chaning menu
  *  09/04/2017 >>> v1.6.002 - hot fix - 'Power Meter' subscription is not called In the case of other devices except the air conditioner
@@ -43,7 +43,7 @@ definition(
     name: "KuKu Harmony${parent ? " - Device" : ""}",
     namespace: "turlvo",
     author: "KuKu",
-    description: "This is a SmartApp that support to control Harmony's device!",
+    description: "This is a SmartApp that support to control Harmony's device and activity!",
     category: "Convenience",
     parent: parent ? "turlvo.KuKu Harmony" : null,
     singleInstance: true,
@@ -52,51 +52,51 @@ definition(
     iconX3Url: "https://cdn.rawgit.com/turlvo/KuKuHarmony/master/images/icon/KuKu_Harmony_Icon_3x.png")
 
 preferences {
-	page(name: "parentOrChildPage")
-    
+    page(name: "parentOrChildPage")
+
     page(name: "mainPage")
     page(name: "installPage")
     page(name: "mainChildPage")
-    
+
 }
 
 // ------------------------------
 // Pages related to Parent
 def parentOrChildPage() {
-	parent ? mainChildPage() : mainPage()
+    parent ? mainChildPage() : mainPage()
 }
 
 // mainPage
-// seperated two danymic page by 'isInstalled' value 
+// seperated two danymic page by 'isInstalled' value
 def mainPage() {
     if (!atomicState?.isInstalled) {
         return installPage()
     } else {
-    	def interval
-    	discoverHubs(atomicState.harmonyApiServerIP)
+        def interval
+        discoverHubs(atomicState.harmonyApiServerIP)
         if (atomicState.discoverdHubs) {
             interval = 15
         } else {
             interval = 3
         }
         return dynamicPage(name: "mainPage", title: "", uninstall: true, refreshInterval: interval) {
-            //getHubStatus()            
+            //getHubStatus()
             section("Harmony-API Server IP Address :") {
-            	href "installPage", title: "", description: "${atomicState.harmonyApiServerIP}"
+                href "installPage", title: "", description: "${atomicState.harmonyApiServerIP}"
             }
-            
+
             section("Harmony Hub List :") {
-            	if (atomicState.discoverdHubs) {
-                	atomicState.discoverdHubs.each {
-                    	paragraph "$it"
-                    }                
+                if (atomicState.discoverdHubs) {
+                    atomicState.discoverdHubs.each {
+                        paragraph "$it"
+                    }
                 } else {
-            		paragraph "None"
+                    paragraph "None"
                 }
             }
 
             section("") {
-                app( name: "harmonyDevices", title: "Add a device...", appName: "KuKu Harmony", namespace: "turlvo", multiple: true, uninstall: false)
+                app( name: "harmonyDevicesAndActivities", title: "Add a device and activity...", appName: "KuKu Harmony", namespace: "turlvo", multiple: true, uninstall: false)
             }
 
             section("KuKu Harmony Version :") {
@@ -107,15 +107,15 @@ def mainPage() {
 }
 
 def installPage() {
-	dynamicPage(name: "installPage", title: "", install: !atomicState.isInstalled) {
+    dynamicPage(name: "installPage", title: "", install: !atomicState.isInstalled) {
             section("Enter the Harmony-API Server IP address :") {
-       	       input name: "harmonyHubIP", type: "text", required: true, title: "IP address?", submitOnChange: true
+                  input name: "harmonyHubIP", type: "text", required: true, title: "IP address?", submitOnChange: true
             }
-            
+
             if (harmonyHubIP) {
-            	atomicState.harmonyApiServerIP = harmonyHubIP
+                atomicState.harmonyApiServerIP = harmonyHubIP
             }
-    } 	    
+    }
 }
 
 def initializeParent() {
@@ -125,47 +125,48 @@ def initializeParent() {
 }
 
 def getHarmonyApiServerIP() {
-	return atomicState.harmonyApiServerIP
+    return atomicState.harmonyApiServerIP
 }
 
 // ------------------------------
 // Pages realted to Child App
 def mainChildPage() {
     def interval
-    if (atomicState.discoverdHubs && atomicState.deviceCommands && atomicState.device) {
+    if (atomicState.discoverdHubs && ((atomicState.deviceCommands && atomicState.device) || atomicState.activity)) {
         interval = 15
     } else {
         interval = 3
     }
-    return dynamicPage(name: "mainChildPage", title: "Add Device", refreshInterval: interval, uninstall: true, install: true) {    	
+    return dynamicPage(name: "mainChildPage", title: "Add Device or Activity", refreshInterval: interval, uninstall: true, install: true) {
         log.debug "mainChildPage>> parent's atomicState.harmonyApiServerIP: ${parent.getHarmonyApiServerIP()}"
         atomicState.harmonyApiServerIP = parent.getHarmonyApiServerIP()
-        
-        log.debug "installHubPage>> $atomicState.discoverdHubs"        
+
+        log.debug "installHubPage>> $atomicState.discoverdHubs"
         if (atomicState.discoverdHubs == null) {
             discoverHubs(atomicState.harmonyApiServerIP)
-            section() {            
+            section() {
                 paragraph "Discovering Harmony Hub.  Please wait..."
             }
         } else {
-            section("Hub :") {                
-                //def hubs = getHubs(harmonyHubIP)                    
+            section("Hub :") {
+                //def hubs = getHubs(harmonyHubIP)
                 input name: "selectHub", type: "enum", title: "Select Hub", options: atomicState.discoverdHubs, submitOnChange: true, required: true
                 log.debug "mainChildPage>> selectHub: $selectHub"
                 if (selectHub) {
                     discoverDevices(selectHub)
+                    discoverActivities(selectHub)
                     atomicState.hub = selectHub
-                }                
+                }
             }
-        }    
+        }
 
         def foundDevices = getHubDevices()
         if (atomicState.hub && foundDevices) {
-            section("Device :") {                
+            section("Device :") {
                 def labelOfDevice = getLabelsOfDevices(foundDevices)
                 input name: "selectedDevice", type: "enum",  title: "Select Device", multiple: false, options: labelOfDevice, submitOnChange: true, required: true
                 if (selectedDevice) {
-                	discoverCommandsOfDevice(selectedDevice)
+                    discoverCommandsOfDevice(selectedDevice)
                     atomicState.device = selectedDevice
                 }
             }
@@ -173,13 +174,13 @@ def mainChildPage() {
             if (selectedDevice) {
                 section("Device Type :") {
                     def deviceType = ["Default", "Aircon", "TV", "Roboking", "Fan"]
-                    input name: "selectedDeviceType", type: "enum", title: "Select Device Type", multiple: false, options: deviceType, submitOnChange: true, required: true                    
+                    input name: "selectedDeviceType", type: "enum", title: "Select Device Type", multiple: false, options: deviceType, submitOnChange: true, required: true
                 }
-            }  
+            }
 
 
             atomicState.deviceCommands = getCommandsOfDevice()
-            if (selectedDeviceType && atomicState.deviceCommands) {    
+            if (selectedDeviceType && atomicState.deviceCommands) {
                 atomicState.selectedDeviceType = selectedDeviceType
                 switch (selectedDeviceType) {
                     case "Aircon":
@@ -201,6 +202,7 @@ def mainChildPage() {
                         log.debug "selectedDeviceType>> default"
                     addDefaultDevice()
                 }
+                atomicState.selectedType = "Device"
             } else if (selectedDeviceType && atomicState.deviceCommands == null) {
                 // log.debug "addDevice()>> selectedDevice: $selectedDevice, commands : $commands"
                 section("") {
@@ -212,45 +214,61 @@ def mainChildPage() {
                 paragraph "Discovering devices.  Please wait..."
             }
         }
+
+        def foundActivities = getHubActivities()
+        if (atomicState.hub && foundActivities) {
+            section("Activities :") {
+                def labelOfActivities = getLabelsOfActivities(foundActivities)
+                input name: "selectedActivity", type: "enum",  title: "Select Activity", multiple: false, options: labelOfActivities, submitOnChange: true, required: true
+                if (selectedActivity) {
+                    discoverCommandsOfActivities(selectedActivity)
+                    atomicState.activity = selectedActivity
+                    atomicState.selectedType = "Activity"
+                }
+            }
+        } else if (atomicState.hub) {
+            section() {
+                paragraph "Discovering activities.  Please wait..."
+            }
+        }
     }
 }
 
 // Add device page for Default On/Off device
 def addDefaultDevice() {
-    def labelOfCommand = getLabelsOfCommands(atomicState.deviceCommands)
-    state.selectedCommands = [:]    
+    state.selectedCommands = [:]
 
-    section("Commands :") {            
+    section("Commands :") {
         input name: "selectedPowerOn", type: "enum", title: "Power On", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
         input name: "selectedPowerOff", type: "enum", title: "Power Off", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
     }
     state.selectedCommands["power-on"] = selectedPowerOn
     state.selectedCommands["power-off"] = selectedPowerOff
 
-	monitorMenu() 
+    monitorMenu()
 }
 
 // Add device page for Fan device
 def addFanDevice() {
     def labelOfCommand = getLabelsOfCommands(atomicState.deviceCommands)
-    state.selectedCommands = [:]  
+    state.selectedCommands = [:]
 
-    section("Commands :") {            
+    section("Commands :") {
         // input name: "selectedPower", type: "enum", title: "Power Toggle", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
         input name: "selectedPowerOn", type: "enum", title: "Power On", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
         input name: "selectedPowerOff", type: "enum", title: "Power Off", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
         input name: "selectedSpeed", type: "enum", title: "Speed", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
         input name: "selectedSwing", type: "enum", title: "Swing", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
         input name: "selectedTimer", type: "enum", title: "Timer", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
-        input name: "custom1", type: "enum", title: "Custom1", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
-        input name: "custom2", type: "enum", title: "Custom2", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
-        input name: "custom3", type: "enum", title: "Custom3", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
-        input name: "custom4", type: "enum", title: "Custom4", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
-        input name: "custom5", type: "enum", title: "Custom5", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
+        input name: "custom1", type: "enum", title: "Custom1", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "custom2", type: "enum", title: "Custom2", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "custom3", type: "enum", title: "Custom3", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "custom4", type: "enum", title: "Custom4", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "custom5", type: "enum", title: "Custom5", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
     }
     //state.selectedCommands["power"] = selectedPower
     state.selectedCommands["power-on"] = selectedPowerOn
-    state.selectedCommands["power-off"] = selectedPowerOff    
+    state.selectedCommands["power-off"] = selectedPowerOff
     state.selectedCommands["speed"] = selectedSpeed
     state.selectedCommands["swing"] = selectedSwing
     state.selectedCommands["timer"] = selectedTimer
@@ -258,35 +276,35 @@ def addFanDevice() {
     state.selectedCommands["custom2"] = custom2
     state.selectedCommands["custom3"] = custom3
     state.selectedCommands["custom4"] = custom4
-    state.selectedCommands["custom5"] = custom5    
+    state.selectedCommands["custom5"] = custom5
 
-	monitorMenu() 
+    monitorMenu()
 }
 
 // Add device page for Aircon
 def addAirconDevice() {
     def labelOfCommand = getLabelsOfCommands(atomicState.deviceCommands)
-    state.selectedCommands = [:]    
+    state.selectedCommands = [:]
 
-    section("Commands :") {            
+    section("Commands :") {
         //input name: "selectedPowerToggle", type: "enum", title: "Power Toggle", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
         input name: "selectedPowerOn", type: "enum", title: "Power On", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
         input name: "selectedPowerOff", type: "enum", title: "Power Off", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
         input name: "selectedTempUp", type: "enum", title: "Temperature Up", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
         input name: "selectedMode", type: "enum", title: "Mode", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
-        input name: "selectedJetCool", type: "enum", title: "JetCool", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
-        input name: "selectedTempDown", type: "enum", title: "Temperature Down", options: labelOfCommand, submitOnChange: true, multiple: false, required: false    
-        input name: "selectedSpeed", type: "enum", title: "Fan Speed", options: labelOfCommand, submitOnChange: true, multiple: false, required: false   
-        input name: "custom1", type: "enum", title: "Custom1", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
-        input name: "custom2", type: "enum", title: "Custom2", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
-        input name: "custom3", type: "enum", title: "Custom3", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
-        input name: "custom4", type: "enum", title: "Custom4", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
-        input name: "custom5", type: "enum", title: "Custom5", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
+        input name: "selectedJetCool", type: "enum", title: "JetCool", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "selectedTempDown", type: "enum", title: "Temperature Down", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "selectedSpeed", type: "enum", title: "Fan Speed", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "custom1", type: "enum", title: "Custom1", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "custom2", type: "enum", title: "Custom2", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "custom3", type: "enum", title: "Custom3", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "custom4", type: "enum", title: "Custom4", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "custom5", type: "enum", title: "Custom5", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
     }
 
     //state.selectedCommands["power"] = selectedPowerToggle
     state.selectedCommands["power-on"] = selectedPowerOn
-    state.selectedCommands["power-off"] = selectedPowerOff    
+    state.selectedCommands["power-off"] = selectedPowerOff
     state.selectedCommands["tempup"] = selectedTempUp
     state.selectedCommands["mode"] = selectedMode
     state.selectedCommands["jetcool"] = selectedJetCool
@@ -296,40 +314,40 @@ def addAirconDevice() {
     state.selectedCommands["custom2"] = custom2
     state.selectedCommands["custom3"] = custom3
     state.selectedCommands["custom4"] = custom4
-    state.selectedCommands["custom5"] = custom5  
+    state.selectedCommands["custom5"] = custom5
 
-	monitorMenu() 
+    monitorMenu()
 }
 
 // Add device page for TV
 def addTvDeviceTV() {
     def labelOfCommand = getLabelsOfCommands(atomicState.deviceCommands)
-    state.selectedCommands = [:]    
+    state.selectedCommands = [:]
 
-    section("Commands :") {            
+    section("Commands :") {
         //input name: "selectedPowerToggle", type: "enum", title: "Power Toggle", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
         input name: "selectedPowerOn", type: "enum", title: "Power On", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
         input name: "selectedPowerOff", type: "enum", title: "Power Off", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
         input name: "selectedVolumeUp", type: "enum", title: "Volume Up", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
         input name: "selectedChannelUp", type: "enum", title: "Channel Up", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
-        input name: "selectedMute", type: "enum", title: "Mute", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
-        input name: "selectedVolumeDown", type: "enum", title: "Volume Down", options: labelOfCommand, submitOnChange: true, multiple: false, required: false    
-        input name: "selectedChannelDown", type: "enum", title: "Channel Down", options: labelOfCommand, submitOnChange: true, multiple: false, required: false      
-        input name: "selectedMenu", type: "enum", title: "Menu", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
-        input name: "selectedHome", type: "enum", title: "Home", options: labelOfCommand, submitOnChange: true, multiple: false, required: false    
-        input name: "selectedInput", type: "enum", title: "Input", options: labelOfCommand, submitOnChange: true, multiple: false, required: false              
-        input name: "selectedBack", type: "enum", title: "Back", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
-        input name: "custom1", type: "enum", title: "Custom1", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
-        input name: "custom2", type: "enum", title: "Custom2", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
-        input name: "custom3", type: "enum", title: "Custom3", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
-        input name: "custom4", type: "enum", title: "Custom4", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
-        input name: "custom5", type: "enum", title: "Custom5", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
+        input name: "selectedMute", type: "enum", title: "Mute", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "selectedVolumeDown", type: "enum", title: "Volume Down", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "selectedChannelDown", type: "enum", title: "Channel Down", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "selectedMenu", type: "enum", title: "Menu", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "selectedHome", type: "enum", title: "Home", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "selectedInput", type: "enum", title: "Input", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "selectedBack", type: "enum", title: "Back", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "custom1", type: "enum", title: "Custom1", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "custom2", type: "enum", title: "Custom2", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "custom3", type: "enum", title: "Custom3", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "custom4", type: "enum", title: "Custom4", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "custom5", type: "enum", title: "Custom5", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
     }
-    
+
     //state.selectedCommands["power"] = selectedPowerToggle
     state.selectedCommands["power-on"] = selectedPowerOn
-    state.selectedCommands["power-off"] = selectedPowerOff  
-	state.selectedCommands["volup"] = selectedVolumeUp
+    state.selectedCommands["power-off"] = selectedPowerOff
+    state.selectedCommands["volup"] = selectedVolumeUp
     state.selectedCommands["chup"] = selectedChannelUp
     state.selectedCommands["mute"] = selectedMute
     state.selectedCommands["voldown"] = selectedVolumeDown
@@ -342,34 +360,34 @@ def addTvDeviceTV() {
     state.selectedCommands["custom2"] = custom2
     state.selectedCommands["custom3"] = custom3
     state.selectedCommands["custom4"] = custom4
-    state.selectedCommands["custom5"] = custom5  
- 
- 	monitorMenu() 
+    state.selectedCommands["custom5"] = custom5
+
+    monitorMenu()
 }
 
 // Add device page for Aircon
 def addRobokingDevice() {
     def labelOfCommand = getLabelsOfCommands(atomicState.deviceCommands)
-    state.selectedCommands = [:]    
+    state.selectedCommands = [:]
 
     section("Commands :") {
         input name: "selectedStart", type: "enum", title: "Start", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
-        input name: "selectedHome", type: "enum", title: "Home", options: labelOfCommand, submitOnChange: true, multiple: false, required: true  
+        input name: "selectedHome", type: "enum", title: "Home", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
         input name: "selectedStop", type: "enum", title: "Stop", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
         input name: "selectedUp", type: "enum", title: "Up", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
-        input name: "selectedDown", type: "enum", title: "Down", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
-        input name: "selectedLeft", type: "enum", title: "Left", options: labelOfCommand, submitOnChange: true, multiple: false, required: false    
-        input name: "selectedRight", type: "enum", title: "Right", options: labelOfCommand, submitOnChange: true, multiple: false, required: false        
-        input name: "selectedMode", type: "enum", title: "Mode", options: labelOfCommand, submitOnChange: true, multiple: false, required: false    
-        input name: "selectedTurbo", type: "enum", title: "Turbo", options: labelOfCommand, submitOnChange: true, multiple: false, required: false   
-        input name: "custom1", type: "enum", title: "Custom1", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
-        input name: "custom2", type: "enum", title: "Custom2", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
-        input name: "custom3", type: "enum", title: "Custom3", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
-        input name: "custom4", type: "enum", title: "Custom4", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
-        input name: "custom5", type: "enum", title: "Custom5", options: labelOfCommand, submitOnChange: true, multiple: false, required: false  
+        input name: "selectedDown", type: "enum", title: "Down", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "selectedLeft", type: "enum", title: "Left", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "selectedRight", type: "enum", title: "Right", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "selectedMode", type: "enum", title: "Mode", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "selectedTurbo", type: "enum", title: "Turbo", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "custom1", type: "enum", title: "Custom1", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "custom2", type: "enum", title: "Custom2", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "custom3", type: "enum", title: "Custom3", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "custom4", type: "enum", title: "Custom4", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
+        input name: "custom5", type: "enum", title: "Custom5", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
     }
 
-	state.selectedCommands["start"] = selectedStart
+    state.selectedCommands["start"] = selectedStart
     state.selectedCommands["stop"] = selectedStop
     state.selectedCommands["up"] = selectedUp
     state.selectedCommands["down"] = selectedDown
@@ -382,9 +400,9 @@ def addRobokingDevice() {
     state.selectedCommands["custom2"] = custom2
     state.selectedCommands["custom3"] = custom3
     state.selectedCommands["custom4"] = custom4
-    state.selectedCommands["custom5"] = custom5  
-    
-    monitorMenu() 
+    state.selectedCommands["custom5"] = custom5
+
+    monitorMenu()
 
 }
 
@@ -394,14 +412,14 @@ def monitorMenu() {
     section("State Monitor :") {
         paragraph "It is a function to complement IrDA's biggest drawback. Through sensor's state, synchronize deivce status."
         def monitorType = ["Power Meter", "Contact"]
-        input name: "selectedMonitorType", type: "enum", title: "Select Monitor Type", multiple: false, options: monitorType, submitOnChange: true, required: false                    
-    }  
+        input name: "selectedMonitorType", type: "enum", title: "Select Monitor Type", multiple: false, options: monitorType, submitOnChange: true, required: false
+    }
 
     atomicState.selectedMonitorType = selectedMonitorType
-    if (selectedMonitorType) {            
+    if (selectedMonitorType) {
         switch (selectedMonitorType) {
             case "Power Meter":
-            powerMonitorMenu()                
+            powerMonitorMenu()
             break
             case "Contact":
             contactMonitorMenu()
@@ -415,20 +433,20 @@ def powerMonitorMenu() {
         input name: "powerMonitor", type: "capability.powerMeter", title: "Device", submitOnChange: true, multiple: false, required: false
         state.triggerOnFlag = false;
         state.triggerOffFlag = false;
-        if (powerMonitor) {                
+        if (powerMonitor) {
             input name: "triggerOnValue", type: "decimal", title: "On Trigger Watt", submitOnChange: true, multiple: false, required: true
-            input name: "triggerOffValue", type: "decimal", title: "Off Trigger Watt", submitOnChange: true, multiple: false, required: true                
-        }   
-    } 
+            input name: "triggerOffValue", type: "decimal", title: "Off Trigger Watt", submitOnChange: true, multiple: false, required: true
+        }
+    }
 }
 
 def contactMonitorMenu() {
     section("Contact :") {
         input name: "contactMonitor", type: "capability.contactSensor", title: "Device", submitOnChange: true, multiple: false, required: false
-    	if (contactMonitor) {    
+        if (contactMonitor) {
             paragraph "[Normal] : Open(On) / Close(Off)\n[Reverse] : Open(Off) / Close(On)"
-            input name: "contactMonitorMode", type: "enum", title: "Mode", multiple: false, options: ["Normal", "Reverse"], defaultValue: "Normal", submitOnChange: true, required: true	
-    	}
+            input name: "contactMonitorMode", type: "enum", title: "Mode", multiple: false, options: ["Normal", "Reverse"], defaultValue: "Normal", submitOnChange: true, required: true
+        }
         atomicState.contactMonitorMode = contactMonitorMode
     }
 }
@@ -438,14 +456,14 @@ def contactMonitorMenu() {
 // Monitor Handler
 // Subscribe power value and change status
 def powerMonitorHandler(evt) {
-    def device = []    
+    def device = []
     device = getDeviceByName("$selectedDevice")
     def deviceId = device.id
     def child = getChildDevice(deviceId)
     def event
 
-    log.debug "value is over triggerValue>> flag: $state.triggerOnFlag, value: $evt.value, triggerValue: ${triggerOnValue.floatValue()}"        
-    if (Float.parseFloat(evt.value) >= triggerOnValue.floatValue() && state.triggerOnFlag == false) {    	
+    log.debug "value is over triggerValue>> flag: $state.triggerOnFlag, value: $evt.value, triggerValue: ${triggerOnValue.floatValue()}"
+    if (Float.parseFloat(evt.value) >= triggerOnValue.floatValue() && state.triggerOnFlag == false) {
         event =  [value: "on"]
         child.generateEvent(event)
         log.debug "value is over send*****"
@@ -455,8 +473,8 @@ def powerMonitorHandler(evt) {
     }
 
     log.debug "value is under triggerValue>> flag: $state.triggerOffFlag, value: $evt.value, triggerValue: ${triggerOffValue.floatValue()}"
-    if (Float.parseFloat(evt.value) <= triggerOffValue.floatValue() && state.triggerOffFlag == false){    	
-        event =  [value: "off"]        
+    if (Float.parseFloat(evt.value) <= triggerOffValue.floatValue() && state.triggerOffFlag == false){
+        event =  [value: "off"]
         child.generateEvent(event)
         log.debug "value is under send*****"
         state.triggerOffFlag = true
@@ -468,74 +486,120 @@ def powerMonitorHandler(evt) {
 
 // Subscribe contact value and change status
 def contactMonitorHandler(evt) {
-    def device = []    
+    def device = []
     device = getDeviceByName("$selectedDevice")
     def deviceId = device.id
     def child = getChildDevice(deviceId)
     def event
 
-	def contacted = "off", notContacted = "on"
+    def contacted = "off", notContacted = "on"
     if (atomicState.contactMonitorMode == "Reverse") {
-    	contacted = "on"
+        contacted = "on"
         notContacted = "off"
     }
     log.debug "contactMonitorHandler>> value is : $evt.value"
     if (evt.value == "open") {
-        event = [value: notContacted] 
+        event = [value: notContacted]
     } else {
-        event = [value: contacted] 
+        event = [value: contacted]
     }
     child.generateEvent(event)
 }
 
-// Install child device
+// Install child device and activity
 def initializeChild(devicetype) {
-    //def devices = getDevices()    
-    log.debug "addDeviceDone: $selectedDevice, type: $atomicState.selectedMonitorType"
-    app.updateLabel("$selectedDevice")
+    if (atomicState.selectedType == "Device") {
+        log.debug "addDeviceDone: $selectedDevice type: $atomicState.selectedMonitorType"
+        app.updateLabel("$selectedDevice")
 
-	unsubscribe()
-    if (atomicState.selectedMonitorType == "Power Meter") {  
-    	log.debug "Power: $powerMonitor"
-    	subscribe(powerMonitor, "power", powerMonitorHandler)
-    } else if (atomicState.selectedMonitorType == "Contact") {
-    	log.debug "Contact: $contactMonitor"
-    	subscribe(contactMonitor, "contact", contactMonitorHandler)
-    }
-    def device = []    
-    device = getDeviceByName("$selectedDevice")
-    log.debug "addDeviceDone>> device: $device"    
+        unsubscribe()
+        if (atomicState.selectedMonitorType == "Power Meter") {
+            log.debug "Power: $powerMonitor"
+            subscribe(powerMonitor, "power", powerMonitorHandler)
+        } else if (atomicState.selectedMonitorType == "Contact") {
+            log.debug "Contact: $contactMonitor"
+            subscribe(contactMonitor, "contact", contactMonitorHandler)
+        }
+        def device = []
+        device = getDeviceByName("$selectedDevice")
+        log.debug "addDeviceDone >> device: $device"
 
-    def deviceId = device.id
-    def existing = getChildDevice(deviceId)
-    if (!existing) {
-        def childDevice = addChildDevice("turlvo", "KuKu Harmony_${atomicState.selectedDeviceType}", deviceId, null, ["label": device.label])
+        def deviceId = device.id
+        def existing = getChildDevice(deviceId)
+        if (!existing) {
+            def childDevice = addChildDevice("turlvo", "KuKu Harmony_${atomicState.selectedDeviceType}", deviceId, null, ["label": device.label])
+        } else {
+            log.debug "Device already created"
+        }
+    } else if (atomicState.selectedType == "Activity") {
+        log.debug "addActivityDone: $selectedActivity"
+        app.updateLabel("$selectedActivity")
+
+        unsubscribe()
+        def activity = []
+        activity = getActivityByName("$selectedActivity")
+        log.debug "addActivityDone >> activity: $activity"
+
+        def activityId = activity.id
+        def existing = getChildDevice(activityId)
+        if (!existing) {
+            def childDevice = addChildDevice("turlvo", "KuKu Harmony_Activity", activityId, null, ["label": activity.label])
+        } else {
+            log.debug "Device already created"
+        }
     } else {
-        log.debug "Device already created"
+        section() {
+            paragraph "Something wrong..."
+        }
     }
 }
 
-
 // For child Device
 def command(child, command) {
-	def device = getDeviceByName("$selectedDevice")
-    
-	log.debug "childApp parent command(child)>>  $selectedDevice, command: $command, changed Command: ${state.selectedCommands[command]}"
-    def commandSlug = getSlugOfCommandByLabel(atomicState.deviceCommands, state.selectedCommands[command])
-    log.debug "childApp parent command(child)>>  commandSlug : $commandSlug"
-    
-    def result
-    result = sendCommandToDevice(device.slug, commandSlug)
-    if (result && result.message != "ok") {
-        sendCommandToDevice(device.slug, commandSlug)
+    if ($selectedDevice != null) {
+        def device = getDeviceByName("$selectedDevice")
+
+        log.debug "childApp parent command(child)>>  $selectedDevice, command: $command, changed Command: ${state.selectedCommands[command]}"
+        def commandSlug = getSlugOfCommandByLabel(atomicState.deviceCommands, state.selectedCommands[command])
+        log.debug "childApp parent command(child)>>  commandSlug : $commandSlug"
+
+        def result
+        result = sendCommandToDevice(device.slug, commandSlug)
+        if (result && result.message != "ok") {
+            sendCommandToDevice(device.slug, commandSlug)
+        }
+    } else if ($selectedActivity != null) {
+        def activity = []
+        if (command == "power-on") {
+            activity = getActivityByName("$selectedActivity")
+        } else if (command == "power-off") {
+            activity = getActivityByName("PowerOff")
+        }
+
+        log.debug "childApp parent command(child)>>  $selectedActivity, command: $command"
+        def activitySlug = activity.slug
+        log.debug "childApp parent command(child)>>  acitivitySlug : $activitySlug"
+
+        def result
+        result = sendCommandToDevice(activity.slug, activitySlug)
+        if (result && result.message != "ok") {
+            sendCommandToDevice(activity.slug, activitySlug)
+        }
+    } else {
+        log.debug "Something wrong..."
     }
 }
 
 def commandValue(child, command) {
-	def device = getDeviceByName("$selectedDevice")
-    
-	log.debug "childApp parent commandValue(child)>>  $selectedDevice, command: $command"
-    
+    if ($selectedDevice == null) {
+        log.debug "Something wrong..."
+        return
+    }
+
+    def device = getDeviceByName("$selectedDevice")
+
+    log.debug "childApp parent commandValue(child)>>  $selectedDevice, command: $command"
+
     def result
     result = sendCommandToDevice(device.slug, command)
     if (result && result.message != "ok") {
@@ -543,11 +607,9 @@ def commandValue(child, command) {
     }
 }
 
-
-
 // ------------------------------------
 // ------- Default Common Method -------
-def installed() {    
+def installed() {
     initialize()
 }
 
@@ -557,13 +619,13 @@ def updated() {
 }
 
 def initialize() {
-	log.debug "initialize()"
-   parent ? initializeChild() : initializeParent()
+    log.debug "initialize()"
+    parent ? initializeChild() : initializeParent()
 }
 
 
 def uninstalled() {
-	parent ? null : removeChildDevices(getChildDevices())
+    parent ? null : removeChildDevices(getChildDevices())
 }
 
 private removeChildDevices(delete) {
@@ -579,7 +641,7 @@ private removeChildDevices(delete) {
 // getSelectedHub
 // return : Installed hub name
 def getSelectedHub() {
-	return atomicState.hub
+    return atomicState.hub
 }
 
 // getLabelsOfDevices
@@ -587,14 +649,27 @@ def getSelectedHub() {
 // - devices : List of devices in Harmony Hub {label, slug}
 // return : Array of devices's label value
 def getLabelsOfDevices(devices) {
-	def labels = []
-    devices.each { 
+    def labels = []
+    devices.each {
         //log.debug "labelOfDevice: $it"
         labels.add(it.label)
     }
-    
+
     return labels
 
+}
+
+// getLabelsOfActivities
+// parameter :
+// - activities : List of activities in Harmony Hub {label, slug}
+// return : Array of activities's label value
+def getLabelsOfActivities(activities) {
+    def labels = []
+    activities.each {
+        log.debug "labelOfActivities: $it"
+        labels.add(it.label)
+    }
+    return labels
 }
 
 // getLabelsOfCommands
@@ -602,13 +677,13 @@ def getLabelsOfDevices(devices) {
 // - cmds : List of some device's commands {label, slug}
 // return : Array of commands's label value
 def getLabelsOfCommands(cmds) {
-	def labels = []
+    def labels = []
     log.debug "getLabelsOfCommands>> cmds"
     cmds.each {
-    	//log.debug "getLabelsOfCommands: it.label : $it.label, slug : $it.slug"
-    	labels.add(it.label)
+        //log.debug "getLabelsOfCommands: it.label : $it.label, slug : $it.slug"
+        labels.add(it.label)
     }
-    
+
     return labels
 }
 
@@ -616,8 +691,16 @@ def getLabelsOfCommands(cmds) {
 // return : result of 'discoverCommandsOfDevice(device)' method. It means that recently requested device's commands
 def getCommandsOfDevice() {
     //log.debug "getCommandsOfDevice>> $atomicState.foundCommandOfDevice"
-    
+
     return atomicState.foundCommandOfDevice
+
+}
+
+// getCommandsOfActivity
+// return : result of 'discoverCommandsOfActivities(activity)' method. It means that recently requested activity's commands
+def getCommandsOfActivity() {
+    //log.debug "getCommandsOfActivity >> $atomicState.foundCommandOfActivity"
+    return atomicState.foundCommandOfActivity
 
 }
 
@@ -627,14 +710,14 @@ def getCommandsOfDevice() {
 // - label : name of command
 // return : slug value same with label in the list of command
 def getSlugOfCommandByLabel(commands, label) {
-	//def commands = []
+    //def commands = []
     def slug
-    
-    commands.each {    	
-    	if (it.label == label) {
-        	//log.debug "it.label : $it.label, device : $device"
-        	log.debug "getSlugOfCommandByLabel>> $it"
-        	//commands = it.commands
+
+    commands.each {
+        if (it.label == label) {
+            //log.debug "it.label : $it.label, device : $device"
+            log.debug "getSlugOfCommandByLabel>> $it"
+            //commands = it.commands
             slug = it.slug
         }
     }
@@ -646,34 +729,55 @@ def getSlugOfCommandByLabel(commands, label) {
 // - name : device name searching
 // return : device matched by name in Harmony Hub's devices
 def getDeviceByName(name) {
-	def device = []    
-	atomicState.devices.each {
-    	//log.debug "getDeviceByName>> $it.label, $name"
-    	if (it.label == name) {
-    		log.debug "getDeviceByName>> $it"
+    def device = []
+    atomicState.devices.each {
+        //log.debug "getDeviceByName>> $it.label, $name"
+        if (it.label == name) {
+            log.debug "getDeviceByName>> $it"
             device = it
         }
-	}
-    
+    }
+
     return device
 }
- 
+
+// getActivityByName
+// parameter :
+// - name : activity name searching
+// return : activity matched by name in Harmony Hub's activities
+def getActivityByName(name) {
+    def activity = []
+    atomicState.activities.each {
+        log.debug "getActivityByName>> $it.label, $name"
+        if (it.label == name) {
+            log.debug "getActivityByName>> $it"
+            device = it
+        }
+    }
+    return activity
+}
+
 // getHubDevices
 // return : searched list of device in Harmony Hub when installed
 def getHubDevices() {
-	return atomicState.devices
+    return atomicState.devices
 }
 
+// getHubActivities
+// return : searched list of activities in Harmony Hub when installed
+def getHubActivities() {
+    return atomicState.activities
+}
 
 // --------------------------------
 // ------- HubAction Methos -------
 // sendCommandToDevice
-// parameter : 
+// parameter :
 // - device : target device
 // - command : sending command
 // return : 'sendCommandToDevice_response()' method callback
 def sendCommandToDevice(device, command) {
-	log.debug("sendCommandToDevice >> harmonyApiServerIP : ${parent.getHarmonyApiServerIP()}")
+    log.debug("sendCommandToDevice >> harmonyApiServerIP : ${parent.getHarmonyApiServerIP()}")
     sendHubCommand(setHubAction(parent.getHarmonyApiServerIP(), "/hubs/$atomicState.hub/devices/$device/commands/$command", "sendCommandToDevice_response"))
 }
 
@@ -683,117 +787,183 @@ def sendCommandToDevice_response(resp) {
     log.debug("sendCommandToDevice_response >> $body")
 }
 
+// --------------------------------
+// ------- HubAction Methos -------
+// sendCommandToActivity
+// parameter :
+// - activity : target activity
+// - command : on/off
+// return : 'sendCommandToActivity_response()' method callback
+def sendCommandToActivity(device, command) {
+    log.debug("sendCommandToActivity >> harmonyApiServerIP : ${parent.getHarmonyApiServerIP()}")
+    sendHubCommand(setHubAction(parent.getHarmonyApiServerIP(), "/hubs/$atomicState.hub/devices/$device/commands/$command", "sendCommandToDevice_response"))
+}
+
+def sendCommandToDevice_response(resp) {
+    def result = []
+    def body = new groovy.json.JsonSlurper().parseText(parseLanMessage(resp.description).body)
+    log.debug("sendCommandToDevice_response >> $body")
+}
 // getHubStatus
-// parameter : 
+// parameter :
 // return : 'getHubStatus_response()' method callback
-def getHubStatus() {	
+def getHubStatus() {
     log.debug "getHubStatus"
     sendHubCommand(getHubAction(atomicState.harmonyApiServerIP, "/hubs/$atomicState.hub/status", "getHubStatus_response"))
     if (atomicState.getHubStatusWatchdog == true) {
-    	atomicState.hubStatus = "offline"
+        atomicState.hubStatus = "offline"
     }
-    atomicState.getHubStatusWatchdog = true        
+    atomicState.getHubStatusWatchdog = true
 }
 
 def getHubStatus_response(resp) {
-   	def result = []
+    def result = []
     atomicState.getHubStatusWatchdog = false
-    
+
     if (resp.description != null && parseLanMessage(resp.description).body) {
-    	log.debug "getHubStatus_response>> response: $resp.description"
-    	def body = new groovy.json.JsonSlurper().parseText(parseLanMessage(resp.description).body)
-	
-        if(body && body.off != null) {            	
+        log.debug "getHubStatus_response>> response: $resp.description"
+        def body = new groovy.json.JsonSlurper().parseText(parseLanMessage(resp.description).body)
+
+        if(body && body.off != null) {
             log.debug "getHubStatus_response>> $body.off"
             if (body.off == false) {
-            	atomicState.hubStatus = "online"
+                atomicState.hubStatus = "online"
             }
         } else {
             log.debug "getHubStatus_response>> $body.off"
             atomicState.hubStatus = "offline"
         }
     } else {
-    	log.debug "getHubStatus_response>> Status error"
+        log.debug "getHubStatus_response>> Status error"
         atomicState.hubStatus = "offline"
     }
 }
 
 // discoverCommandsOfDevice
-// parameter : 
+// parameter :
 // - name : name of device searching command
 // return : 'discoverCommandsOfDevice_response()' method callback
 def discoverCommandsOfDevice(name) {
-	device = getDeviceByName(name)
+    device = getDeviceByName(name)
     log.debug "discoverCommandsOfDevice>> name:$name, device:$device"
-    
+
     sendHubCommand(getHubAction(atomicState.harmonyApiServerIP, "/hubs/$atomicState.hub/devices/${device.slug}/commands", "discoverCommandsOfDevice_response"))
 
 }
 
 def discoverCommandsOfDevice_response(resp) {
-   	def result = []
+    def result = []
     def body = new groovy.json.JsonSlurper().parseText(parseLanMessage(resp.description).body)
-	
-    if(body) {            	
-        body.commands.each {            
+
+    if(body) {
+        body.commands.each {
             def command = ['label' : it.label, 'slug' : it.slug]
             //log.debug "getCommandsOfDevice_response>> command: $command"
-            result.add(command)            
+            result.add(command)
         }
     }
-    
+
     atomicState.foundCommandOfDevice = result
 }
 
+// discoverCommandsOfActivities
+// parameter :
+// - name : name of activity searching command
+// return : 'discoverCommandsOfActivities_response()' method callback
+def discoverCommandsOfActivities(name) {
+    activity = getActivityByName(name)
+    log.debug "discoverCommandsOfActivities >> name:$name, activity:$activity"
+    sendHubCommand(getHubAction(atomicState.harmonyApiServerIP, "/hubs/$atomicState.hub/activities/${activity.slug}/commands", "discoverCommandsOfActivities_response"))
+}
+
+def discoverCommandsOfActivities_response(resp) {
+    def result = []
+    def body = new groovy.json.JsonSlurper().parseText(parseLanMessage(resp.description).body)
+    if(body) {
+        body.commands.each {
+            def command = ['label' : it.label, 'slug' : it.slug]
+            log.debug "discoverCommandsOfActivities_response >> command: $command"
+            result.add(command)
+        }
+    }
+    atomicState.foundCommandOfActivity = result
+}
+
 // discoverDevices
-// parameter : 
+// parameter :
 // - hubname : name of hub searching devices
 // return : 'discoverDevices_response()' method callback
 def discoverDevices(hubname) {
-	log.debug "discoverDevices>> $hubname"
-	sendHubCommand(getHubAction(atomicState.harmonyApiServerIP, "/hubs/$hubname/devices", "discoverDevices_response"))
+    log.debug "discoverDevices>> $hubname"
+    sendHubCommand(getHubAction(atomicState.harmonyApiServerIP, "/hubs/$hubname/devices", "discoverDevices_response"))
 }
 
 def discoverDevices_response(resp) {
-	def result = []
+    def result = []
     def body = new groovy.json.JsonSlurper().parseText(parseLanMessage(resp.description).body)
     log.debug("discoverHubs_response >> $body.devices")
-	
-    if(body) {            	
+
+    if(body) {
         body.devices.each {
             //log.debug "getHubDevices_response: $it.id, $it.label, $it.slug"
             def device = ['id' : it.id, 'label' : it.label, 'slug' : it.slug]
             result.add(device)
         }
-    }            
+    }
     atomicState.devices = result
 
 }
 
 
+// discoverActivities
+// parameter :
+// - hubname : name of hub searching activities
+// return : 'discoverActivities_response()' method callback
+def discoverActivities(hubname) {
+    log.debug "discoverActivities >> $hubname"
+    sendHubCommand(getHubAction(atomicState.harmonyApiServerIP, "/hubs/$hubname/activities", "discoverActivities_response"))
+}
+
+def discoverActivities_response(resp) {
+    def result = []
+    def body = new groovy.json.JsonSlurper().parseText(parseLanMessage(resp.description).body)
+    log.debug("discoverActivities_response >> $body.activities")
+
+    if(body) {
+        body.devices.each {
+            log.debug "discoverActivities_response: $it.id, $it.label, $it.slug, $it.isAVActivity"
+            def activity = ['id' : it.id, 'label' : it.label, 'slug' : it.slug, 'isAVActivity" : it.isAVActivity]
+            result.add(activity)
+        }
+    }
+    atomicState.activities = result
+
+}
+
+
 // discoverHubs
-// parameter : 
+// parameter :
 // - host : ip address searching hubs
 // return : 'discoverHubs_response()' method callback
 def discoverHubs(host) {
-	log.debug("discoverHubs")
+    log.debug("discoverHubs")
     return sendHubCommand(getHubAction(host, "/hubs", "discoverHubs_response"))
 }
 
 def discoverHubs_response(resp) {
-	def result = []
+    def result = []
     def body = new groovy.json.JsonSlurper().parseText(parseLanMessage(resp.description).body)
     log.debug("discoverHubs_response >> $body.hubs")
-	
-    if(body && body.hubs != null) {            	
+
+    if(body && body.hubs != null) {
         body.hubs.each {
             log.debug "discoverHubs_response: $it"
             result.add(it)
         }
         atomicState.discoverdHubs = result
     } else {
-    	atomicState.discoverdHubs = null
-    }    
+        atomicState.discoverdHubs = null
+    }
 }
 
 // -----------------------------
@@ -804,7 +974,7 @@ def discoverHubs_response(resp) {
 // - url : target url
 // - callback : response callback method name
 def getHubAction(host, url, callback) {
-	log.debug "getHubAction>> $host, $url, $callback"
+    log.debug "getHubAction>> $host, $url, $callback"
     return new physicalgraph.device.HubAction("GET ${url} HTTP/1.1\r\nHOST: ${host}\r\n\r\n",
             physicalgraph.device.Protocol.LAN, "${host}", [callback: callback])
 }
@@ -815,7 +985,7 @@ def getHubAction(host, url, callback) {
 // - url : target url
 // - callback : response callback method name
 def setHubAction(host, url, callback) {
-	log.debug "getHubAction>> $host, $url, $callback"
+    log.debug "getHubAction>> $host, $url, $callback"
     return new physicalgraph.device.HubAction("POST ${url} HTTP/1.1\r\nHOST: ${host}\r\n\r\n",
             physicalgraph.device.Protocol.LAN, "${host}", [callback: callback])
 }
