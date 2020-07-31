@@ -160,75 +160,84 @@ def mainChildPage() {
             }
         }
 
-        def foundDevices = getHubDevices()
-        if (atomicState.hub && foundDevices) {
-            section("Device :") {
-                def labelOfDevice = getLabelsOfDevices(foundDevices)
-                input name: "selectedDevice", type: "enum",  title: "Select Device", multiple: false, options: labelOfDevice, submitOnChange: true, required: true
-                if (selectedDevice) {
-                    discoverCommandsOfDevice(selectedDevice)
-                    atomicState.device = selectedDevice
-                }
-            }
-
-            if (selectedDevice) {
-                section("Device Type :") {
-                    def deviceType = ["Default", "Aircon", "TV", "Roboking", "Fan"]
-                    input name: "selectedDeviceType", type: "enum", title: "Select Device Type", multiple: false, options: deviceType, submitOnChange: true, required: true
-                }
-            }
-
-
-            atomicState.deviceCommands = getCommandsOfDevice()
-            if (selectedDeviceType && atomicState.deviceCommands) {
-                atomicState.selectedDeviceType = selectedDeviceType
-                switch (selectedDeviceType) {
-                    case "Aircon":
-                    addAirconDevice()
-                    break
-                    case "TV":
-                    case "STB":
-                    addTvDeviceTV()
-                    break
-                    case "STB":
-                    break
-                    case "Roboking":
-                    addRobokingDevice()
-                    break
-                    case "Fan":
-                    addFanDevice()
-                    break
-                    default:
-                        log.debug "selectedDeviceType>> default"
-                    addDefaultDevice()
-                }
-                atomicState.selectedType = "Device"
-            } else if (selectedDeviceType && atomicState.deviceCommands == null) {
-                // log.debug "addDevice()>> selectedDevice: $selectedDevice, commands : $commands"
-                section("") {
-                    paragraph "Loading selected device's command.  This can take a few seconds. Please wait..."
-                }
-            }
-        } else if (atomicState.hub) {
-            section() {
-                paragraph "Discovering devices.  Please wait..."
+        if (atomicState.hub) {
+            section("Type :") {
+                def type = ["Device", "Activity"]
+                input name: "selectedType", type: "enum", title: "Select Type", multiple: false, options: type, submitOnChange: true, required: true
             }
         }
 
-        def foundActivities = getHubActivities()
-        if (atomicState.hub && foundActivities) {
-            section("Activities :") {
-                def labelOfActivities = getLabelsOfActivities(foundActivities)
-                input name: "selectedActivity", type: "enum",  title: "Select Activity", multiple: false, options: labelOfActivities, submitOnChange: true, required: true
-                if (selectedActivity) {
-                    discoverCommandsOfActivities(selectedActivity)
-                    atomicState.activity = selectedActivity
-                    atomicState.selectedType = "Activity"
+        if (selectedType == "Device") {
+            def foundDevices = getHubDevices()
+            if (atomicState.hub && foundDevices) {
+                section("Device :") {
+                    def labelOfDevice = getLabelsOfDevices(foundDevices)
+                    input name: "selectedDevice", type: "enum",  title: "Select Device", multiple: false, options: labelOfDevice, submitOnChange: true, required: true
+                    if (selectedDevice) {
+                        discoverCommandsOfDevice(selectedDevice)
+                        atomicState.device = selectedDevice
+                    }
+                }
+
+                if (selectedDevice) {
+                    section("Device Type :") {
+                        def deviceType = ["Default", "Aircon", "TV", "Roboking", "Fan"]
+                        input name: "selectedDeviceType", type: "enum", title: "Select Device Type", multiple: false, options: deviceType, submitOnChange: true, required: true
+                    }
+                }
+
+                atomicState.deviceCommands = getCommandsOfDevice()
+                if (selectedDeviceType && atomicState.deviceCommands) {
+                    atomicState.selectedDeviceType = selectedDeviceType
+                    switch (selectedDeviceType) {
+                        case "Aircon":
+                        addAirconDevice()
+                        break
+                        case "TV":
+                        case "STB":
+                        addTvDeviceTV()
+                        break
+                        case "STB":
+                        break
+                        case "Roboking":
+                        addRobokingDevice()
+                        break
+                        case "Fan":
+                        addFanDevice()
+                        break
+                        default:
+                            log.debug "selectedDeviceType>> default"
+                        addDefaultDevice()
+                    }
+                    atomicState.selectedType = selectedType
+                } else if (selectedDeviceType && atomicState.deviceCommands == null) {
+                    // log.debug "addDevice()>> selectedDevice: $selectedDevice, commands : $commands"
+                    section("") {
+                        paragraph "Loading selected device's command.  This can take a few seconds. Please wait..."
+                    }
+                }
+            } else if (atomicState.hub) {
+                section() {
+                    paragraph "Discovering devices.  Please wait..."
                 }
             }
-        } else if (atomicState.hub) {
-            section() {
-                paragraph "Discovering activities.  Please wait..."
+        } else if (selectedType = "Activity") {
+            def foundActivities = getHubActivities()
+
+            if (atomicState.hub && foundActivities) {
+                section("Activities :") {
+                    def labelOfActivities = getLabelsOfActivities(foundActivities)
+                    input name: "selectedActivity", type: "enum",  title: "Select Activity", multiple: false, options: labelOfActivities, submitOnChange: true, required: true
+                    if (selectedActivity) {
+                        discoverCommandsOfActivities(selectedActivity)
+                        atomicState.activity = selectedActivity
+                        atomicState.selectedType = selectedType
+                    }
+                }
+            } else if (atomicState.hub) {
+                section() {
+                    paragraph "Discovering activities.  Please wait..."
+                }
             }
         }
     }
