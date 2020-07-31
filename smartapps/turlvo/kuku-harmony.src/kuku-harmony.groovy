@@ -236,6 +236,7 @@ def mainChildPage() {
 
 // Add device page for Default On/Off device
 def addDefaultDevice() {
+    def labelOfCommand = getLabelsOfCommands(atomicState.deviceCommands)
     state.selectedCommands = [:]
 
     section("Commands :") {
