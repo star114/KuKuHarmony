@@ -224,6 +224,7 @@ def mainChildPage() {
                 }
             }
         } else if (selectedType == "Activity") {
+            log.debug "addActivity()>> foundActivities: $foundActivities, atomicState.activities: $atomicState"
             def foundActivities = getHubActivities()
 
             if (atomicState.hub && foundActivities) {
@@ -925,14 +926,13 @@ def discoverActivities_response(resp) {
     log.debug("discoverActivities_response >> $body.activities")
 
     if(body) {
-        body.devices.each {
+        body.activities.each {
             log.debug "discoverActivities_response: $it.id, $it.label, $it.slug, $it.isAVActivity"
             def activity = ['id' : it.id, 'label' : it.label, 'slug' : it.slug, 'isAVActivity' : it.isAVActivity]
             result.add(activity)
         }
     }
     atomicState.activities = result
-
 }
 
 
