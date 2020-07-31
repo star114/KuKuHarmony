@@ -141,10 +141,17 @@ def mainChildPage() {
         log.debug "mainChildPage>> parent's atomicState.harmonyApiServerIP: ${parent.getHarmonyApiServerIP()}"
         atomicState.harmonyApiServerIP = parent.getHarmonyApiServerIP()
 
-        log.debug "mainChildPage>> which type?"
         section("Type :") {
             def type = ["Device", "Activity"]
             input name: "selectedType", type: "enum", title: "Select Type", multiple: false, options: type, submitOnChange: true, required: true
+            atomicState.selectedType = selectedType
+        }
+
+        if (atomicState.selectedType == null) {
+            section() {
+                paragraph "Please select type first."
+            }
+            return
         }
 
         log.debug "installHubPage>> $atomicState.discoverdHubs"
@@ -232,9 +239,8 @@ def mainChildPage() {
                     def labelOfActivities = getLabelsOfActivities(foundActivities)
                     input name: "selectedActivity", type: "enum",  title: "Select Activity", multiple: false, options: labelOfActivities, submitOnChange: true, required: true
                     if (selectedActivity) {
-                        discoverCommandsOfActivities(selectedActivity)
+                        log.debug "addActivity()>> selectedActivity: $selectedActivity"
                         atomicState.activity = selectedActivity
-                        atomicState.selectedType = selectedType
                     }
                 }
             } else if (atomicState.hub) {
@@ -709,14 +715,6 @@ def getCommandsOfDevice() {
 
 }
 
-// getCommandsOfActivity
-// return : result of 'discoverCommandsOfActivities(activity)' method. It means that recently requested activity's commands
-def getCommandsOfActivity() {
-    //log.debug "getCommandsOfActivity >> $atomicState.foundCommandOfActivity"
-    return atomicState.foundCommandOfActivity
-
-}
-
 // getSlugOfCommandByLabel
 // parameter :
 // - commands : List of device's command
@@ -860,29 +858,6 @@ def discoverCommandsOfDevice_response(resp) {
     }
 
     atomicState.foundCommandOfDevice = result
-}
-
-// discoverCommandsOfActivities
-// parameter :
-// - name : name of activity searching command
-// return : 'discoverCommandsOfActivities_response()' method callback
-def discoverCommandsOfActivities(name) {
-    activity = getActivityByName(name)
-    log.debug "discoverCommandsOfActivities >> name:$name, activity:$activity"
-    sendHubCommand(getHubAction(atomicState.harmonyApiServerIP, "/hubs/$atomicState.hub/activities/${activity.slug}/commands", "discoverCommandsOfActivities_response"))
-}
-
-def discoverCommandsOfActivities_response(resp) {
-    def result = []
-    def body = new groovy.json.JsonSlurper().parseText(parseLanMessage(resp.description).body)
-    if(body) {
-        body.commands.each {
-            def command = ['label' : it.label, 'slug' : it.slug]
-            log.debug "discoverCommandsOfActivities_response >> command: $command"
-            result.add(command)
-        }
-    }
-    atomicState.foundCommandOfActivity = result
 }
 
 // discoverDevices
