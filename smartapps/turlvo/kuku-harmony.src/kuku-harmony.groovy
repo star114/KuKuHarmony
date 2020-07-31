@@ -218,7 +218,6 @@ def mainChildPage() {
                             log.debug "selectedDeviceType>> default"
                         addDefaultDevice()
                     }
-                    atomicState.selectedType = selectedType
                 } else if (selectedDeviceType && atomicState.deviceCommands == null) {
                     // log.debug "addDevice()>> selectedDevice: $selectedDevice, commands : $commands"
                     section("") {
@@ -762,7 +761,7 @@ def getActivityByName(name) {
         log.debug "getActivityByName>> $it.label, $name"
         if (it.label == name) {
             log.debug "getActivityByName>> $it"
-            device = it
+            activity = it
         }
     }
     return activity
