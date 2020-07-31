@@ -595,13 +595,12 @@ def command(child, command) {
             activity = getActivityByName("PowerOff")
         }
 
-        def activitySlug = activity.slug
-        log.debug "childApp parent command(child)>>  acitivitySlug : $activitySlug"
+        log.debug "childApp parent command(child)>>  acitivitySlug : $activity.slug"
 
         def result
-        result = sendCommandToDevice(activity.slug, activitySlug)
+        result = sendCommandToActivity(activity.slug)
         if (result && result.message != "ok") {
-            sendCommandToDevice(activity.slug, activitySlug)
+            sendCommandToActivity(activity.slug)
         }
     } else {
         log.debug "command>> Something wrong..."
@@ -797,6 +796,22 @@ def sendCommandToDevice_response(resp) {
     log.debug("sendCommandToDevice_response >> $body")
 }
 
+// --------------------------------
+// ------- HubAction Methos -------
+// sendCommandToActivity
+// parameter :
+// - activity : target activity
+// return : 'sendCommandToDevice_response()' method callback
+def sendCommandToActivity(activity) {
+    log.debug("sendCommandToActivity >> harmonyApiServerIP : ${parent.getHarmonyApiServerIP()}")
+    sendHubCommand(setHubAction(parent.getHarmonyApiServerIP(), "/hubs/$atomicState.hub/activities/$activity", "sendCommandToActivity_response"))
+}
+
+def sendCommandToActivity_response(resp) {
+    def result = []
+    def body = new groovy.json.JsonSlurper().parseText(parseLanMessage(resp.description).body)
+    log.debug("sendCommandToActivity_response >> $body")
+}
 // getHubStatus
 // parameter :
 // return : 'getHubStatus_response()' method callback
