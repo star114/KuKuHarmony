@@ -141,6 +141,12 @@ def mainChildPage() {
         log.debug "mainChildPage>> parent's atomicState.harmonyApiServerIP: ${parent.getHarmonyApiServerIP()}"
         atomicState.harmonyApiServerIP = parent.getHarmonyApiServerIP()
 
+        log.debug "mainChildPage>> which type?"
+        section("Type :") {
+            def type = ["Device", "Activity"]
+            input name: "selectedType", type: "enum", title: "Select Type", multiple: false, options: type, submitOnChange: true, required: true
+        }
+
         log.debug "installHubPage>> $atomicState.discoverdHubs"
         if (atomicState.discoverdHubs == null) {
             discoverHubs(atomicState.harmonyApiServerIP)
@@ -153,17 +159,13 @@ def mainChildPage() {
                 input name: "selectHub", type: "enum", title: "Select Hub", options: atomicState.discoverdHubs, submitOnChange: true, required: true
                 log.debug "mainChildPage>> selectHub: $selectHub"
                 if (selectHub) {
-                    discoverDevices(selectHub)
-                    discoverActivities(selectHub)
+                    if (selectedType == "Device") {
+                        discoverDevices(selectHub)
+                    } else if (selectedType == "Activity") {
+                        discoverActivities(selectHub)
+                    }
                     atomicState.hub = selectHub
                 }
-            }
-        }
-
-        if (atomicState.hub) {
-            section("Type :") {
-                def type = ["Device", "Activity"]
-                input name: "selectedType", type: "enum", title: "Select Type", multiple: false, options: type, submitOnChange: true, required: true
             }
         }
 
