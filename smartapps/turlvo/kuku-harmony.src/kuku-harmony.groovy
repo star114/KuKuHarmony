@@ -221,7 +221,7 @@ def mainChildPage() {
                     paragraph "Discovering devices.  Please wait..."
                 }
             }
-        } else if (selectedType = "Activity") {
+        } else if (selectedType == "Activity") {
             def foundActivities = getHubActivities()
 
             if (atomicState.hub && foundActivities) {
