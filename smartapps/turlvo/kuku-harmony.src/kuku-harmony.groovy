@@ -629,7 +629,7 @@ def refresh(child) {
         log.debug "activity>> childApp parent refresh(child)>>  $selectedActivity"
         getCurrentActivity()
         def activity = getActivityByName("$selectedActivity")
-        log.debug "childApp parent refresh(child)>>  acitivitySlug : $activity.slug"
+        log.debug "childApp parent refresh(child)>>  acitivity label : $activity.label, current activity label : $atomicState.currentActivity"
         return atomicState.currentActivity == activity.label
     } else {
         log.debug "refresh>> Something wrong..."

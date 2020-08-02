@@ -65,6 +65,7 @@ def refresh()
 {
     log.debug "Refreshing Status"
     def currentStatus = parent.refresh(this)
+    log.debug "Refreshing Status to $currentStatus"
     if (currentStatus == true) {
         sendEvent(name: "switch", value: "on")
     } else {
