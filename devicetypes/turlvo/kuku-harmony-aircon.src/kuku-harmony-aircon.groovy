@@ -19,7 +19,8 @@
 
 metadata {
     definition (name: "KuKu Harmony_Aircon", namespace: "turlvo", author: "KuKu") {
-        capability "Thermostat"
+        capability "Actuator"
+        capability "Switch"
         capability "Refresh"
         capability "Sensor"
         capability "Configuration"
@@ -37,37 +38,11 @@ metadata {
     }
 
     tiles(scale: 2) {
-        multiAttributeTile(name:"thermostatBasic", type:"thermostat", width:6, height:4) {
-            tileAttribute("device.temperature", key: "PRIMARY_CONTROL") {
-                attributeState("temp", label:'${currentValue}', unit:"dC", defaultState: true,
-                backgroundColors:[
-                    [value: 18, color: "#153591"],
-                    [value: 20, color: "#1e9cbb"],
-                    [value: 22, color: "#90d2a7"],
-                    [value: 24, color: "#44b621"],
-                    [value: 26, color: "#f1d801"],
-                    [value: 28, color: "#d04e00"],
-                    [value: 30, color: "#bc2323"]
-                ])
-            }
-            tileAttribute("device.temperature", key: "VALUE_CONTROL") {
-                attributeState("VALUE_UP", action: "tempUp")
-                attributeState("VALUE_DOWN", action: "tempDown")
-            }
-        }
-
-        valueTile("temperature", "device.temperature", width: 2, height: 2) {
-            state("temperature", label:'${currentValue}', unit:"dC",
-                backgroundColors:[
-                    [value: 18, color: "#153591"],
-                    [value: 20, color: "#1e9cbb"],
-                    [value: 22, color: "#90d2a7"],
-                    [value: 24, color: "#44b621"],
-                    [value: 26, color: "#f1d801"],
-                    [value: 28, color: "#d04e00"],
-                    [value: 30, color: "#bc2323"]
-                ]
-            )
+        standardTile ("actionFlat", "device.switch", width: 2, height: 2, decoration: "flat") {
+            state "off", label: '${currentValue}', action: "switch.on", icon: "st.switches.switch.off", backgroundColor: "#ffffff", nextState:"turningOn"
+            state "on", label: '${currentValue}', action: "switch.off", icon: "st.switches.switch.on", backgroundColor: "#00a0dc", nextState:"turningOff"
+            state "off", label: '${currentValue}', action: "switch.on", icon: "st.switches.switch.off", backgroundColor: "#ffffff", nextState:"turningOn"
+            state "on", label: '${currentValue}', action: "switch.off", icon: "st.switches.switch.on", backgroundColor: "#00a0dc", nextState:"turningOff"
         }
 
         standardTile("tempdown", "device.temperature", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
@@ -93,10 +68,10 @@ metadata {
         }
     }
 
-    main("thermostatBasic")
+    main("switch")
     details([
-        "thermostatBasic",
-        "temperature", "tempdown", "tempup",
+        "switch",
+        "tempdown", "tempup",
         "tempSliderControl", "tempSliderControlValue",
         "mode", "jetcool", "speed"
     ])
@@ -173,7 +148,6 @@ def off() {
         log.debug "Already turned off, skip OFF command"
     }
 }
-
 
 def virtualOn() {
     log.debug "child on()"

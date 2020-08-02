@@ -308,11 +308,6 @@ def addAirconDevice() {
         input name: "selectedJetCool", type: "enum", title: "JetCool", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
         input name: "selectedTempDown", type: "enum", title: "Temperature Down", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
         input name: "selectedSpeed", type: "enum", title: "Fan Speed", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
-        input name: "custom1", type: "enum", title: "Custom1", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
-        input name: "custom2", type: "enum", title: "Custom2", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
-        input name: "custom3", type: "enum", title: "Custom3", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
-        input name: "custom4", type: "enum", title: "Custom4", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
-        input name: "custom5", type: "enum", title: "Custom5", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
     }
 
     //state.selectedCommands["power"] = selectedPowerToggle
@@ -323,11 +318,6 @@ def addAirconDevice() {
     state.selectedCommands["jetcool"] = selectedJetCool
     state.selectedCommands["tempdown"] = selectedTempDown
     state.selectedCommands["speed"] = selectedSpeed
-    state.selectedCommands["custom1"] = custom1
-    state.selectedCommands["custom2"] = custom2
-    state.selectedCommands["custom3"] = custom3
-    state.selectedCommands["custom4"] = custom4
-    state.selectedCommands["custom5"] = custom5
 
     monitorMenu()
 }
