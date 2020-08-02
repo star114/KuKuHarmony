@@ -58,7 +58,7 @@ metadata {
     }
 
     tiles (scale: 2){
-        standardTile ("actionFlat", "device.switch", width: 2, height: 2, decoration: "flat") {
+        StandardTile ("actionFlat", "device.switch", width: 2, height: 2, decoration: "flat") {
             state "off", label: '${currentValue}', action: "switch.on", icon: "st.switches.switch.off", backgroundColor: "#ffffff", nextState:"turningOn"
             state "on", label: '${currentValue}', action: "switch.off", icon: "st.switches.switch.on", backgroundColor: "#00a0dc", nextState:"turningOff"
             state "off", label: '${currentValue}', action: "switch.on", icon: "st.switches.switch.off", backgroundColor: "#ffffff", nextState:"turningOn"
