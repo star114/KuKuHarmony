@@ -29,24 +29,15 @@ metadata {
         command "virtualOff"
 
         command "reboot"
-
-        //attribute   "needUpdate", "string"
     }
 
     tiles (scale: 2){
-        multiAttributeTile(name:"switch", type: "generic", width: 6, height: 4, canChangeIcon: true){
-            tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
-                attributeState "off", label:'${name}', action:"switch.on", backgroundColor:"#ffffff", icon: "st.switches.switch.off", nextState:"turningOn"
-                attributeState "on", label:'${name}', action:"switch.off", backgroundColor:"#00A0DC", icon: "st.switches.switch.on", nextState:"turningOff"
-                attributeState "turningOn", label:'${name}', action:"switch.off", backgroundColor:"#00A0DC", icon: "st.switches.switch.off", nextState:"turningOff"
-                attributeState "turningOff", label:'${name}', action:"switch.on", backgroundColor:"#ffffff", icon: "st.switches.switch.on", nextState:"turningOn"
-            }
+        standardTile ("actionFlat", "device.switch", width: 2, height: 2, decoration: "flat") {
+            state "off", label: '${currentValue}', action: "switch.on", icon: "st.switches.switch.off", backgroundColor: "#ffffff", nextState:"turningOn"
+            state "on", label: '${currentValue}', action: "switch.off", icon: "st.switches.switch.on", backgroundColor: "#00a0dc", nextState:"turningOff"
+            state "off", label: '${currentValue}', action: "switch.on", icon: "st.switches.switch.off", backgroundColor: "#ffffff", nextState:"turningOn"
+            state "on", label: '${currentValue}', action: "switch.off", icon: "st.switches.switch.on", backgroundColor: "#00a0dc", nextState:"turningOff"
         }
-                standardTile("zoomOut", "device.zoomSupported", width: 1, height: 1, canChangeIcon: false, canChangeBackground: false, decoration: "flat") {
-              state "yes", label: "zoom out", action: "zoomOut", icon: "st.custom.buttons.subtract-icon"
-            state "no", label: "zoom unavail", action: "", icon: "st.custom.buttons.subtract-icon"
-        }
-
     }
 
     main(["switch"])
@@ -70,12 +61,6 @@ def updated()
 def parse(String description) {
     log.debug "Parsing '${description}'"
 }
-
-def momentaryOnHandler() {
-    log.debug "momentaryOnHandler()"
-    sendEvent(name: "switch", value: "off")
-}
-
 
 def on() {
     log.debug "child on()"

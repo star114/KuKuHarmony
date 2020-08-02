@@ -26,7 +26,6 @@ metadata {
         capability "Configuration"
         capability "Health Check"
 
-        command "power"
         command "speed"
         command "swing"
         command "timer"
@@ -41,58 +40,44 @@ metadata {
         command "virtualOff"
     }
 
-    preferences {
-        input name: "momentaryOn", type: "bool",title: "Enable Momentary on (for garage door controller)", required: false
-        input name: "momentaryOnDelay", type: "num",title: "Enable Momentary on dealy time(default 5 seconds)", required: false
-    }
-
     tiles (scale: 2){
-        multiAttributeTile(name:"switch", type: "generic", width: 6, height: 4, canChangeIcon: true){
-            tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
-                attributeState "off", label:'${name}', action:"switch.on", backgroundColor:"#ffffff", icon: "st.switches.switch.off", nextState:"turningOn"
-                attributeState "on", label:'${name}', action:"switch.off", backgroundColor:"#00A0DC", icon: "st.switches.switch.on", nextState:"turningOff"
-                attributeState "turningOn", label:'${name}', action:"switch.off", backgroundColor:"#00A0DC", icon: "st.switches.switch.off", nextState:"turningOff"
-                attributeState "turningOff", label:'${name}', action:"switch.on", backgroundColor:"#ffffff", icon: "st.switches.switch.on", nextState:"turningOn"
-            }
+        standardTile ("actionFlat", "device.switch", width: 2, height: 2, decoration: "flat") {
+            state "off", label: '${currentValue}', action: "switch.on", icon: "st.switches.switch.off", backgroundColor: "#ffffff", nextState:"turningOn"
+            state "on", label: '${currentValue}', action: "switch.off", icon: "st.switches.switch.on", backgroundColor: "#00a0dc", nextState:"turningOff"
+            state "off", label: '${currentValue}', action: "switch.on", icon: "st.switches.switch.off", backgroundColor: "#ffffff", nextState:"turningOn"
+            state "on", label: '${currentValue}', action: "switch.off", icon: "st.switches.switch.on", backgroundColor: "#00a0dc", nextState:"turningOff"
         }
 
-        valueTile("power", "device.power", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
-            state "yes", label: "POWER", action: "power"
-            state "no", label: "unavail", action: ""
+        standardTile ("speed", "device.speed", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+            state "speed", label: "SPEED", action: "speed", defaultState: true
         }
-        valueTile("speed", "device.speed", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
-            state "yes", label: "SPEED", action: "speed"
-            state "no", label: "unavail", action: ""
-        }
-        valueTile("swing", "device.swing", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
-            state "yes", label: "SWING", action: "swing"
-            state "no", label: "unavail", action: ""
+        standardTile ("swing", "device.swing", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+            state "swing", label: "SWING", action: "swing", defaultState: true
         }
 
-        valueTile("timer", "device.timer", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
-            state "yes", label: "TIMER", action: "timer"
-            state "no", label: "unavail", action: ""
+        standardTile ("timer", "device.timer", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+            state "timer", label: "TIMER", action: "timer", defaultState: true
         }
 
-        valueTile("custom1", "device.custom1", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
-            state "yes", label: "custom1", action: "custom1"
+        standardTile ("custom1", "device.custom1", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+            state "custom1", label: "custom1", action: "custom1", defaultState: true
         }
-        valueTile("custom2", "device.custom2", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
-            state "yes", label: "custom2", action: "custom2"
+        standardTile ("custom2", "device.custom2", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+            state "custom2", label: "custom2", action: "custom2", defaultState: true
         }
-        valueTile("custom3", "device.custom3", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
-            state "yes", label: "custom3", action: "custom3"
+        standardTile ("custom3", "device.custom3", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+            state "custom3", label: "custom3", action: "custom3", defaultState: true
         }
-        valueTile("custom4", "device.custom4", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
-            state "yes", label: "custom4", action: "custom4"
+        standardTile ("custom4", "device.custom4", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+            state "custom4", label: "custom4", action: "custom4", defaultState: true
         }
-        valueTile("custom5", "device.custom5", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
-            state "yes", label: "custom5", action: "custom5"
+        standardTile ("custom5", "device.custom5", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+            state "custom5", label: "custom5", action: "custom5", defaultState: true
         }
     }
 
     main(["switch"])
-    details(["power", "speed", "swing", "timer",
+    details(["switch", "speed", "swing", "timer",
             "custom1", "custom2", "custom3", "custom4", "custom5"])
 }
 
@@ -104,18 +89,6 @@ def installed() {
 // parse events into attributes
 def parse(String description) {
     log.debug "Parsing '${description}'"
-}
-
-def power() {
-    log.debug "child power()"
-    log.debug "power>> ${device.currentState("switch")?.value}"
-    def currentState = device.currentState("switch")?.value
-
-    if (currentState == "on") {
-        off()
-    } else {
-        on()
-    }
 }
 
 def speed() {
@@ -159,12 +132,6 @@ def custom5() {
 }
 
 
-def momentaryOnHandler() {
-    log.debug "momentaryOnHandler()"
-    sendEvent(name: "switch", value: "off")
-}
-
-
 def on() {
     log.debug "child on()"
 
@@ -176,12 +143,6 @@ def on() {
     } else {
         parent.command(this, "power-on")
         sendEvent(name: "switch", value: "on")
-
-        if (momentaryOn) {
-            if (settings.momentaryOnDelay == null || settings.momentaryOnDelay == "" ) settings.momentaryOnDelay = 5
-            log.debug "momentaryOnHandler() >> time : " + settings.momentaryOnDelay
-            runIn(Integer.parseInt(settings.momentaryOnDelay), momentaryOnHandler, [overwrite: true])
-        }
     }
 }
 

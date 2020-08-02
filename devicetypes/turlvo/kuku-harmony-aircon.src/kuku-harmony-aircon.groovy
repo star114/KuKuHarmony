@@ -19,8 +19,7 @@
 
 metadata {
     definition (name: "KuKu Harmony_Aircon", namespace: "turlvo", author: "KuKu") {
-        capability "Actuator"
-        capability "Switch"
+        capability "Thermostat"
         capability "Refresh"
         capability "Sensor"
         capability "Configuration"
@@ -33,44 +32,49 @@ metadata {
         command "speed"
         command "setRangedLevel", ["number"]
 
-        command "custom1"
-        command "custom2"
-        command "custom3"
-        command "custom4"
-        command "custom5"
-
         command "virtualOn"
         command "virtualOff"
     }
 
-    tiles (scale: 2){
-        standardTile ("actionFlat", "device.switch", width: 2, height: 2, decoration: "flat") {
-            state "off", label: '${currentValue}', action: "switch.on", icon: "st.switches.switch.off", backgroundColor: "#ffffff", nextState:"turningOn"
-            state "on", label: '${currentValue}', action: "switch.off", icon: "st.switches.switch.on", backgroundColor: "#00a0dc", nextState:"turningOff"
-            state "off", label: '${currentValue}', action: "switch.on", icon: "st.switches.switch.off", backgroundColor: "#ffffff", nextState:"turningOn"
-            state "on", label: '${currentValue}', action: "switch.off", icon: "st.switches.switch.on", backgroundColor: "#00a0dc", nextState:"turningOff"
+    tiles(scale: 2) {
+        multiAttributeTile(name:"thermostatBasic", type:"thermostat", width:6, height:4) {
+            tileAttribute("device.temperature", key: "PRIMARY_CONTROL") {
+                attributeState("temp", label:'${currentValue}', unit:"dC", defaultState: true,
+                backgroundColors:[
+                    [value: 18, color: "#153591"],
+                    [value: 20, color: "#1e9cbb"],
+                    [value: 22, color: "#90d2a7"],
+                    [value: 24, color: "#44b621"],
+                    [value: 26, color: "#f1d801"],
+                    [value: 28, color: "#d04e00"],
+                    [value: 30, color: "#bc2323"]
+                ])
+            }
+            tileAttribute("device.temperature", key: "VALUE_CONTROL") {
+                attributeState("VALUE_UP", action: "tempUp")
+                attributeState("VALUE_DOWN", action: "tempDown")
+            }
         }
 
-        standardTile ("tempup", "device.tempup", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
-            state "yes", label: "TEMP UP", action: "tempup"
-            state "no", label: "unavail", action: ""
-        }
-        standardTile ("mode", "device.mode", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
-            state "yes", label: "MODE", action: "mode"
-            state "no", label: "unavail", action: ""
+        valueTile("temperature", "device.temperature", width: 2, height: 2) {
+            state("temperature", label:'${currentValue}', unit:"dC",
+                backgroundColors:[
+                    [value: 18, color: "#153591"],
+                    [value: 20, color: "#1e9cbb"],
+                    [value: 22, color: "#90d2a7"],
+                    [value: 24, color: "#44b621"],
+                    [value: 26, color: "#f1d801"],
+                    [value: 28, color: "#d04e00"],
+                    [value: 30, color: "#bc2323"]
+                ]
+            )
         }
 
-        standardTile ("jetcool", "device.jetcool", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
-            state "yes", label: "JET MODE", action: "jetcool"
-            state "no", label: "unavail", action: ""
+        standardTile("tempdown", "device.temperature", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+            state "tempdown", label:'down', action:"tempdown", defaultState: true
         }
-        standardTile ("tempdown", "device.tempdown", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
-            state "yes", label: "TEMP DOWN", action: "tempdown"
-            state "no", label: "unavail", action: ""
-        }
-        standardTile ("speed", "device.speed", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
-            state "yes", label: "FAN SPEED", action: "speed"
-            state "no", label: "unavail", action: ""
+        standardTile("tempup", "device.temperature", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+            state "tempup", label:'up', action:"tempup", defaultState: true
         }
         controlTile ("tempSliderControl", "device.level", "slider", range:"(18..30)", height: 2, width: 4) {
             state "level", action:"setRangedLevel"
@@ -78,13 +82,24 @@ metadata {
         valueTile ("tempSliderControlValue", "device.level", height: 2, width: 2) {
             state "range", label:'Temperature\n${currentValue}°C', defaultState: true
         }
-
+        standardTile ("mode", "device.mode", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+            state "mode", label: "MODE", action: "mode", defaultState: true
+        }
+        standardTile ("jetcool", "device.jetcool", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+            state "jetcool", label: "JET MODE", action: "jetcool", defaultState: true
+        }
+        standardTile ("speed", "device.speed", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+            state "speed", label: "FAN SPEED", action: "speed", defaultState: true
+        }
     }
 
-    main(["switch"])
-    details(["tempup", "mode",
-            "jetcool", "tempdown", "speed",
-            "tempSliderControl", "tempSliderControlValue"])
+    main("thermostatBasic")
+    details([
+        "thermostatBasic",
+        "temperature", "tempdown", "tempup",
+        "tempSliderControl", "tempSliderControlValue",
+        "mode", "jetcool", "speed"
+    ])
 }
 
 def installed() {
@@ -129,38 +144,6 @@ def setRangedLevel(value) {
     sendEvent(name: "switch", value: "on")
     sendEvent(name:"level", value:value)
 }
-
-def custom1() {
-    log.debug "child custom1()"
-    parent.command(this, "custom1")
-}
-
-def custom2() {
-    log.debug "child custom2()"
-    parent.command(this, "custom2")
-}
-
-def custom3() {
-    log.debug "child custom3()"
-    parent.command(this, "custom3")
-}
-
-def custom4() {
-    log.debug "child custom4()"
-    parent.command(this, "custom4")
-}
-
-def custom5() {
-    log.debug "child custom5()"
-    parent.command(this, "custom5")
-}
-
-
-def momentaryOnHandler() {
-    log.debug "momentaryOnHandler()"
-    sendEvent(name: "switch", value: "off")
-}
-
 
 def on() {
     log.debug "child on()"
