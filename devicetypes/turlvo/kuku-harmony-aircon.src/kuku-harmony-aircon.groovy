@@ -18,14 +18,14 @@
  */
 
 metadata {
-	definition (name: "KuKu Harmony_Aircon", namespace: "turlvo", author: "KuKu") {
+    definition (name: "KuKu Harmony_Aircon", namespace: "turlvo", author: "KuKu") {
         capability "Actuator"
-		capability "Switch"
-		capability "Refresh"
-		capability "Sensor"
+        capability "Switch"
+        capability "Refresh"
+        capability "Sensor"
         capability "Configuration"
         capability "Health Check"
-        
+
         command "power"
         command "tempup"
         command "mode"
@@ -39,88 +39,63 @@ metadata {
         command "custom3"
         command "custom4"
         command "custom5"
-        
+
         command "virtualOn"
         command "virtualOff"
-	}
-
-    preferences {
-        input name: "momentaryOn", type: "bool",title: "Enable Momentary on (for garage door controller)", required: false
-        input name: "momentaryOnDelay", type: "num",title: "Enable Momentary on dealy time(default 5 seconds)", required: false
     }
-    
-	tiles (scale: 2){      
-		multiAttributeTile(name:"switch", type: "generic", width: 6, height: 4, canChangeIcon: true){
-			tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
-                attributeState "off", label:'${name}', action:"switch.on", backgroundColor:"#ffffff", icon: "st.switches.switch.off", nextState:"turningOn"
-				attributeState "on", label:'${name}', action:"switch.off", backgroundColor:"#00A0DC", icon: "st.switches.switch.on", nextState:"turningOff"				
-				attributeState "turningOn", label:'${name}', action:"switch.off", backgroundColor:"#00A0DC", icon: "st.switches.switch.off", nextState:"turningOff"
-				attributeState "turningOff", label:'${name}', action:"switch.on", backgroundColor:"#ffffff", icon: "st.switches.switch.on", nextState:"turningOn"
-			}
+
+    tiles (scale: 2){
+        standardTile ("actionFlat", "device.switch", width: 2, height: 2, decoration: "flat") {
+            state "off", label: '${currentValue}', action: "switch.on", icon: "st.switches.switch.off", backgroundColor: "#ffffff", nextState:"turningOn"
+            state "on", label: '${currentValue}', action: "switch.off", icon: "st.switches.switch.on", backgroundColor: "#00a0dc", nextState:"turningOff"
+            state "off", label: '${currentValue}', action: "switch.on", icon: "st.switches.switch.off", backgroundColor: "#ffffff", nextState:"turningOn"
+            state "on", label: '${currentValue}', action: "switch.off", icon: "st.switches.switch.on", backgroundColor: "#00a0dc", nextState:"turningOff"
         }
 
-        valueTile("power", "device.power", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
-            state "yes", label: "POWER", action: "power"
-            state "no", label: "unavail", action: ""
-        }
-        valueTile("tempup", "device.tempup", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+        standardTile ("tempup", "device.tempup", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "TEMP UP", action: "tempup"
             state "no", label: "unavail", action: ""
         }
-        valueTile("mode", "device.mode", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+        standardTile ("mode", "device.mode", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "MODE", action: "mode"
             state "no", label: "unavail", action: ""
         }
-        
-        valueTile("jetcool", "device.jetcool", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+
+        standardTile ("jetcool", "device.jetcool", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "JET MODE", action: "jetcool"
             state "no", label: "unavail", action: ""
         }
-        valueTile("tempdown", "device.tempdown", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+        standardTile ("tempdown", "device.tempdown", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "TEMP DOWN", action: "tempdown"
             state "no", label: "unavail", action: ""
         }
-        valueTile("speed", "device.speed", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+        standardTile ("speed", "device.speed", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "FAN SPEED", action: "speed"
             state "no", label: "unavail", action: ""
         }
-        controlTile("tempSliderControl", "device.level", "slider", range:"(18..30)", height: 2, width: 4) {
+        controlTile ("tempSliderControl", "device.level", "slider", range:"(18..30)", height: 2, width: 4) {
             state "level", action:"setRangedLevel"
         }
-        valueTile("tempSliderControlValue", "device.level", height: 2, width: 2) {
-			state "range", label:'Temperature\n${currentValue}°C', defaultState: true
-		}
+        valueTile ("tempSliderControlValue", "device.level", height: 2, width: 2) {
+            state "range", label:'Temperature\n${currentValue}°C', defaultState: true
+        }
 
     }
 
-	main(["switch"])
-	details(["power", "tempup", "mode",
-            "jetcool", "tempdown", "speed", 
+    main(["switch"])
+    details(["tempup", "mode",
+            "jetcool", "tempdown", "speed",
             "tempSliderControl", "tempSliderControlValue"])
 }
 
 def installed() {
-	log.debug "installed()"
-	//configure()
+    log.debug "installed()"
+    //configure()
 }
 
 // parse events into attributes
 def parse(String description) {
-	log.debug "Parsing '${description}'"
-}
-
-def power() {
-    log.debug "child power()"
-    
-    //def currentState = device.currentState("switch")?.value
-    def currentState = device.currentValue("switch")
-    log.debug "power>> state: $currentState"
-
-    if (currentState == "on") {
-		off()
-    } else {
-        on()
-    }
+    log.debug "Parsing '${description}'"
 }
 
 def tempup() {
@@ -146,12 +121,12 @@ def tempdown() {
 def speed() {
     log.debug "child speed()"
     parent.command(this, "speed")
-    
+
 }
 
 def setRangedLevel(value) {
-	log.debug "setting ranged level to $value"
-	parent.commandValue(this, value)
+    log.debug "setting ranged level to $value"
+    parent.commandValue(this, value)
     sendEvent(name: "switch", value: "on")
     sendEvent(name:"level", value:value)
 }
@@ -183,8 +158,8 @@ def custom5() {
 
 
 def momentaryOnHandler() {
-	log.debug "momentaryOnHandler()"
-	sendEvent(name: "switch", value: "off")
+    log.debug "momentaryOnHandler()"
+    sendEvent(name: "switch", value: "off")
 }
 
 
@@ -199,17 +174,11 @@ def on() {
     } else {
         parent.command(this, "power-on")
         sendEvent(name: "switch", value: "on")
-
-        if (momentaryOn) {
-            if (settings.momentaryOnDelay == null || settings.momentaryOnDelay == "" ) settings.momentaryOnDelay = 5
-            log.debug "momentaryOnHandler() >> time : " + settings.momentaryOnDelay
-            runIn(Integer.parseInt(settings.momentaryOnDelay), momentaryOnHandler, [overwrite: true])
-        }
     }
 }
 
 def off() {
-    log.debug "child off"    
+    log.debug "child off"
 
     log.debug "off>> ${device.currentState("switch")?.value}"
     def currentState = device.currentState("switch")?.value
@@ -225,17 +194,17 @@ def off() {
 
 
 def virtualOn() {
-	log.debug "child on()"	
+    log.debug "child on()"
     sendEvent(name: "switch", value: "on")
 }
 
 def virtualOff() {
-	log.debug "child off"	
+    log.debug "child off"
     sendEvent(name: "switch", value: "off")
 }
 
 def poll() {
-	log.debug "poll()"
+    log.debug "poll()"
 }
 
 def parseEventData(Map results) {
@@ -246,14 +215,14 @@ def parseEventData(Map results) {
 
 def generateEvent(Map results) {
     results.each { name, value ->
-		log.debug "generateEvent>> name: $name, value: $value"
+        log.debug "generateEvent>> name: $name, value: $value"
         def currentState = device.currentValue("switch")
-		log.debug "generateEvent>> currentState: $currentState"
+        log.debug "generateEvent>> currentState: $currentState"
         if (currentState != value) {
-        	log.debug "generateEvent>> changed to $value"
-        	sendEvent(name: "switch", value: value)
+            log.debug "generateEvent>> changed to $value"
+            sendEvent(name: "switch", value: value)
         } else {
-        	log.debug "generateEvent>> not change"
+            log.debug "generateEvent>> not change"
         }
     }
     return null

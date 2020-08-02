@@ -18,14 +18,14 @@
  */
 
 metadata {
-	definition (name: "KuKu Harmony_Fan", namespace: "turlvo", author: "KuKu") {
+    definition (name: "KuKu Harmony_Fan", namespace: "turlvo", author: "KuKu") {
         capability "Actuator"
-		capability "Switch"
-		capability "Refresh"
-		capability "Sensor"
+        capability "Switch"
+        capability "Refresh"
+        capability "Sensor"
         capability "Configuration"
         capability "Health Check"
-        
+
         command "power"
         command "speed"
         command "swing"
@@ -36,24 +36,24 @@ metadata {
         command "custom3"
         command "custom4"
         command "custom5"
-        
+
         command "virtualOn"
         command "virtualOff"
-	}
+    }
 
     preferences {
         input name: "momentaryOn", type: "bool",title: "Enable Momentary on (for garage door controller)", required: false
         input name: "momentaryOnDelay", type: "num",title: "Enable Momentary on dealy time(default 5 seconds)", required: false
     }
-    
-	tiles (scale: 2){      
-		multiAttributeTile(name:"switch", type: "generic", width: 6, height: 4, canChangeIcon: true){
-			tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
-				attributeState "off", label:'${name}', action:"switch.on", backgroundColor:"#ffffff", icon: "st.switches.switch.off", nextState:"turningOn"
+
+    tiles (scale: 2){
+        multiAttributeTile(name:"switch", type: "generic", width: 6, height: 4, canChangeIcon: true){
+            tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
+                attributeState "off", label:'${name}', action:"switch.on", backgroundColor:"#ffffff", icon: "st.switches.switch.off", nextState:"turningOn"
                 attributeState "on", label:'${name}', action:"switch.off", backgroundColor:"#00A0DC", icon: "st.switches.switch.on", nextState:"turningOff"
-				attributeState "turningOn", label:'${name}', action:"switch.off", backgroundColor:"#00A0DC", icon: "st.switches.switch.off", nextState:"turningOff"
-				attributeState "turningOff", label:'${name}', action:"switch.on", backgroundColor:"#ffffff", icon: "st.switches.switch.on", nextState:"turningOn"
-			}
+                attributeState "turningOn", label:'${name}', action:"switch.off", backgroundColor:"#00A0DC", icon: "st.switches.switch.off", nextState:"turningOff"
+                attributeState "turningOff", label:'${name}', action:"switch.on", backgroundColor:"#ffffff", icon: "st.switches.switch.on", nextState:"turningOn"
+            }
         }
 
         valueTile("power", "device.power", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
@@ -68,42 +68,42 @@ metadata {
             state "yes", label: "SWING", action: "swing"
             state "no", label: "unavail", action: ""
         }
-        
+
         valueTile("timer", "device.timer", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "TIMER", action: "timer"
             state "no", label: "unavail", action: ""
         }
-        
+
         valueTile("custom1", "device.custom1", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "custom1", action: "custom1"
-        }        
+        }
         valueTile("custom2", "device.custom2", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "custom2", action: "custom2"
-        }        
+        }
         valueTile("custom3", "device.custom3", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "custom3", action: "custom3"
-        }        
+        }
         valueTile("custom4", "device.custom4", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "custom4", action: "custom4"
-        }        
+        }
         valueTile("custom5", "device.custom5", width: 2, height: 2, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "custom5", action: "custom5"
         }
     }
 
-	main(["switch"])
-	details(["power", "speed", "swing", "timer",
-    		"custom1", "custom2", "custom3", "custom4", "custom5"])
+    main(["switch"])
+    details(["power", "speed", "swing", "timer",
+            "custom1", "custom2", "custom3", "custom4", "custom5"])
 }
 
 def installed() {
-	log.debug "installed()"
-	//configure()
+    log.debug "installed()"
+    //configure()
 }
 
 // parse events into attributes
 def parse(String description) {
-	log.debug "Parsing '${description}'"
+    log.debug "Parsing '${description}'"
 }
 
 def power() {
@@ -112,7 +112,7 @@ def power() {
     def currentState = device.currentState("switch")?.value
 
     if (currentState == "on") {
-		off()
+        off()
     } else {
         on()
     }
@@ -160,8 +160,8 @@ def custom5() {
 
 
 def momentaryOnHandler() {
-	log.debug "momentaryOnHandler()"
-	sendEvent(name: "switch", value: "off")
+    log.debug "momentaryOnHandler()"
+    sendEvent(name: "switch", value: "off")
 }
 
 
@@ -186,7 +186,7 @@ def on() {
 }
 
 def off() {
-    log.debug "child off"    
+    log.debug "child off"
 
     log.debug "off>> ${device.currentState("switch")?.value}"
     def currentState = device.currentState("switch")?.value
@@ -201,32 +201,32 @@ def off() {
 }
 
 def virtualOn() {
-	log.debug "child on()"	
+    log.debug "child on()"
     sendEvent(name: "switch", value: "on")
 }
 
 def virtualOff() {
-	log.debug "child off"	
+    log.debug "child off"
     sendEvent(name: "switch", value: "off")
 }
 
 def generateEvent(Map results) {
     results.each { name, value ->
-		log.debug "generateEvent>> name: $name, value: $value"
+        log.debug "generateEvent>> name: $name, value: $value"
         def currentState = device.currentValue("switch")
-		log.debug "generateEvent>> currentState: $currentState"
+        log.debug "generateEvent>> currentState: $currentState"
         if (currentState != value) {
-        	log.debug "generateEvent>> changed to $value"
-        	sendEvent(name: "switch", value: value)
+            log.debug "generateEvent>> changed to $value"
+            sendEvent(name: "switch", value: value)
         } else {
-        	log.debug "generateEvent>> not change"
+            log.debug "generateEvent>> not change"
         }
     }
     return null
 }
 
 def poll() {
-	log.debug "poll()"
+    log.debug "poll()"
 }
 
 def parseEventData(Map results) {

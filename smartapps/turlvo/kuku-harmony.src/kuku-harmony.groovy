@@ -190,7 +190,7 @@ def mainChildPage() {
 
                 if (selectedDevice) {
                     section("Device Type :") {
-                        def deviceType = ["Default", "Aircon", "TV", "Roboking", "Fan"]
+                        def deviceType = ["Default", "Aircon", "TV", "Fan"]
                         input name: "selectedDeviceType", type: "enum", title: "Select Device Type", multiple: false, options: deviceType, submitOnChange: true, required: true
                     }
                 }
@@ -205,11 +205,6 @@ def mainChildPage() {
                         case "TV":
                         case "STB":
                         addTvDeviceTV()
-                        break
-                        case "STB":
-                        break
-                        case "Roboking":
-                        addRobokingDevice()
                         break
                         case "Fan":
                         addFanDevice()
@@ -381,47 +376,6 @@ def addTvDeviceTV() {
     state.selectedCommands["custom5"] = custom5
 
     monitorMenu()
-}
-
-// Add device page for Aircon
-def addRobokingDevice() {
-    def labelOfCommand = getLabelsOfCommands(atomicState.deviceCommands)
-    state.selectedCommands = [:]
-
-    section("Commands :") {
-        input name: "selectedStart", type: "enum", title: "Start", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
-        input name: "selectedHome", type: "enum", title: "Home", options: labelOfCommand, submitOnChange: true, multiple: false, required: true
-        input name: "selectedStop", type: "enum", title: "Stop", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
-        input name: "selectedUp", type: "enum", title: "Up", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
-        input name: "selectedDown", type: "enum", title: "Down", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
-        input name: "selectedLeft", type: "enum", title: "Left", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
-        input name: "selectedRight", type: "enum", title: "Right", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
-        input name: "selectedMode", type: "enum", title: "Mode", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
-        input name: "selectedTurbo", type: "enum", title: "Turbo", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
-        input name: "custom1", type: "enum", title: "Custom1", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
-        input name: "custom2", type: "enum", title: "Custom2", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
-        input name: "custom3", type: "enum", title: "Custom3", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
-        input name: "custom4", type: "enum", title: "Custom4", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
-        input name: "custom5", type: "enum", title: "Custom5", options: labelOfCommand, submitOnChange: true, multiple: false, required: false
-    }
-
-    state.selectedCommands["start"] = selectedStart
-    state.selectedCommands["stop"] = selectedStop
-    state.selectedCommands["up"] = selectedUp
-    state.selectedCommands["down"] = selectedDown
-    state.selectedCommands["left"] = selectedLeft
-    state.selectedCommands["right"] = selectedRight
-    state.selectedCommands["home"] = selectedHome
-    state.selectedCommands["mode"] = selectedMode
-    state.selectedCommands["turbo"] = selectedTurbo
-    state.selectedCommands["custom1"] = custom1
-    state.selectedCommands["custom2"] = custom2
-    state.selectedCommands["custom3"] = custom3
-    state.selectedCommands["custom4"] = custom4
-    state.selectedCommands["custom5"] = custom5
-
-    monitorMenu()
-
 }
 
 // ------------------------------------

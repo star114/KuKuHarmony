@@ -18,53 +18,48 @@
  */
 
 metadata {
-	definition (name: "KuKu Harmony_Default", namespace: "turlvo", author: "KuKu") {
+    definition (name: "KuKu Harmony_Default", namespace: "turlvo", author: "KuKu") {
         capability "Actuator"
-		capability "Switch"
-		capability "Refresh"
-		capability "Sensor"
+        capability "Switch"
+        capability "Refresh"
+        capability "Sensor"
         capability "Configuration"
         capability "Health Check"
         command "virtualOn"
         command "virtualOff"
-        
-        command "reboot"
-        
-        //attribute   "needUpdate", "string"
-	}
 
-    preferences {
-        input name: "momentaryOn", type: "bool",title: "Enable Momentary on (for garage door controller)", required: false
-        input name: "momentaryOnDelay", type: "num",title: "Enable Momentary on dealy time(default 5 seconds)", required: false
+        command "reboot"
+
+        //attribute   "needUpdate", "string"
     }
 
-	tiles (scale: 2){      
-		multiAttributeTile(name:"switch", type: "generic", width: 6, height: 4, canChangeIcon: true){
-			tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
-				attributeState "off", label:'${name}', action:"switch.on", backgroundColor:"#ffffff", icon: "st.switches.switch.off", nextState:"turningOn"
+    tiles (scale: 2){
+        multiAttributeTile(name:"switch", type: "generic", width: 6, height: 4, canChangeIcon: true){
+            tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
+                attributeState "off", label:'${name}', action:"switch.on", backgroundColor:"#ffffff", icon: "st.switches.switch.off", nextState:"turningOn"
                 attributeState "on", label:'${name}', action:"switch.off", backgroundColor:"#00A0DC", icon: "st.switches.switch.on", nextState:"turningOff"
-				attributeState "turningOn", label:'${name}', action:"switch.off", backgroundColor:"#00A0DC", icon: "st.switches.switch.off", nextState:"turningOff"
-				attributeState "turningOff", label:'${name}', action:"switch.on", backgroundColor:"#ffffff", icon: "st.switches.switch.on", nextState:"turningOn"
-			}
+                attributeState "turningOn", label:'${name}', action:"switch.off", backgroundColor:"#00A0DC", icon: "st.switches.switch.off", nextState:"turningOff"
+                attributeState "turningOff", label:'${name}', action:"switch.on", backgroundColor:"#ffffff", icon: "st.switches.switch.on", nextState:"turningOn"
+            }
         }
                 standardTile("zoomOut", "device.zoomSupported", width: 1, height: 1, canChangeIcon: false, canChangeBackground: false, decoration: "flat") {
-      		state "yes", label: "zoom out", action: "zoomOut", icon: "st.custom.buttons.subtract-icon"
+              state "yes", label: "zoom out", action: "zoomOut", icon: "st.custom.buttons.subtract-icon"
             state "no", label: "zoom unavail", action: "", icon: "st.custom.buttons.subtract-icon"
-    	}
-        
+        }
+
     }
 
-	main(["switch"])
-	details(["switch"])
+    main(["switch"])
+    details(["switch"])
 }
 
 def installed() {
-	log.debug "installed()"
-	configure()
+    log.debug "installed()"
+    configure()
 }
 
 def configure() {
-        
+
 }
 
 def updated()
@@ -73,12 +68,12 @@ def updated()
 
 // parse events into attributes
 def parse(String description) {
-	log.debug "Parsing '${description}'"
+    log.debug "Parsing '${description}'"
 }
 
 def momentaryOnHandler() {
-	log.debug "momentaryOnHandler()"
-	sendEvent(name: "switch", value: "off")
+    log.debug "momentaryOnHandler()"
+    sendEvent(name: "switch", value: "off")
 }
 
 
@@ -93,17 +88,11 @@ def on() {
     } else {
         parent.command(this, "power-on")
         sendEvent(name: "switch", value: "on")
-
-        if (momentaryOn) {
-            if (settings.momentaryOnDelay == null || settings.momentaryOnDelay == "" ) settings.momentaryOnDelay = 5
-            log.debug "momentaryOnHandler() >> time : " + settings.momentaryOnDelay
-            runIn(Integer.parseInt(settings.momentaryOnDelay), momentaryOnHandler, [overwrite: true])
-        }
     }
 }
 
 def off() {
-    log.debug "child off"    
+    log.debug "child off"
 
     log.debug "off>> ${device.currentState("switch")?.value}"
     def currentState = device.currentState("switch")?.value
@@ -118,32 +107,32 @@ def off() {
 }
 
 def virtualOn() {
-	log.debug "child on()"	
+    log.debug "child on()"
     sendEvent(name: "switch", value: "on")
 }
 
 def virtualOff() {
-	log.debug "child off"	
+    log.debug "child off"
     sendEvent(name: "switch", value: "off")
 }
 
 def generateEvent(Map results) {
     results.each { name, value ->
-		log.debug "generateEvent>> name: $name, value: $value"
+        log.debug "generateEvent>> name: $name, value: $value"
         def currentState = device.currentValue("switch")
-		log.debug "generateEvent>> currentState: $currentState"
+        log.debug "generateEvent>> currentState: $currentState"
         if (currentState != value) {
-        	log.debug "generateEvent>> changed to $value"
-        	sendEvent(name: "switch", value: value)
+            log.debug "generateEvent>> changed to $value"
+            sendEvent(name: "switch", value: value)
         } else {
-        	log.debug "generateEvent>> not change"
+            log.debug "generateEvent>> not change"
         }
     }
     return null
 }
 
 def poll() {
-	log.debug "poll()"
+    log.debug "poll()"
 }
 
 def parseEventData(Map results) {
