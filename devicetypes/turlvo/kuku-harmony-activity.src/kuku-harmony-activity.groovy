@@ -29,13 +29,6 @@ metadata {
         command "virtualOff"
 
         command "reboot"
-
-        //attribute   "needUpdate", "string"
-    }
-
-    preferences {
-        input name: "momentaryOn", type: "bool",title: "Enable Momentary on (for garage door controller)", required: false
-        input name: "momentaryOnDelay", type: "num",title: "Enable Momentary on dealy time(default 5 seconds)", required: false
     }
 
     tiles (scale: 2){
@@ -47,15 +40,14 @@ metadata {
                 attributeState "turningOff", label:'${name}', action:"switch.on", backgroundColor:"#ffffff", icon: "st.switches.switch.on", nextState:"turningOn"
             }
         }
-            standardTile("zoomOut", "device.zoomSupported", width: 1, height: 1, canChangeIcon: false, canChangeBackground: false, decoration: "flat") {
-            state "yes", label: "zoom out", action: "zoomOut", icon: "st.custom.buttons.subtract-icon"
-            state "no", label: "zoom unavail", action: "", icon: "st.custom.buttons.subtract-icon"
+        standardTile("refresh", "device.refresh", inactiveLabel: false, decoration: "flat", width: 2, height: 2)
+        {
+            state "default", action: "refresh.refresh", icon: "st.secondary.refresh"
         }
-
     }
 
     main(["switch"])
-    details(["switch"])
+    details(["switch", "refresh"])
 }
 
 def installed() {
@@ -71,16 +63,21 @@ def updated()
 {
 }
 
+def refresh()
+{
+    log.debug "Refreshing Status"
+    def currentStatus = parent.refresh(this)
+    if (currentStatus == true) {
+        sendEvent(name: "switch", value: "on")
+    } else {
+        sendEvent(name: "switch", value: "off")
+    }
+}
+
 // parse events into attributes
 def parse(String description) {
     log.debug "Parsing '${description}'"
 }
-
-def momentaryOnHandler() {
-    log.debug "momentaryOnHandler()"
-    sendEvent(name: "switch", value: "off")
-}
-
 
 def on() {
     log.debug "child on()"
@@ -93,12 +90,6 @@ def on() {
     } else {
         parent.command(this, "power-on")
         sendEvent(name: "switch", value: "on")
-
-        if (momentaryOn) {
-            if (settings.momentaryOnDelay == null || settings.momentaryOnDelay == "" ) settings.momentaryOnDelay = 5
-            log.debug "momentaryOnHandler() >> time : " + settings.momentaryOnDelay
-            runIn(Integer.parseInt(settings.momentaryOnDelay), momentaryOnHandler, [overwrite: true])
-        }
     }
 }
 

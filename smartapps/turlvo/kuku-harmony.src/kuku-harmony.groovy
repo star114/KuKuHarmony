@@ -587,7 +587,7 @@ def command(child, command) {
             sendCommandToDevice(device.slug, commandSlug)
         }
     } else if (selectedActivity != null) {
-        log.debug "activity>> childApp parent command(child)>>  $selectedDevice, command: $command"
+        log.debug "activity>> childApp parent command(child)>>  $selectedActivity, command: $command"
         def activity = []
         if (command == "power-on") {
             activity = getActivityByName("$selectedActivity")
@@ -622,6 +622,19 @@ def commandValue(child, command) {
     if (result && result.message != "ok") {
         sendCommandToDevice(device.slug, command)
     }
+}
+
+def refresh(child) {
+    if (selectedActivity != null) {
+        log.debug "activity>> childApp parent refresh(child)>>  $selectedActivity"
+        getCurrentActivity()
+        def activity = getActivityByName("$selectedActivity")
+        log.debug "childApp parent refresh(child)>>  acitivitySlug : $activity.slug"
+        return atomicState.currentActivity == activity.label
+    } else {
+        log.debug "refresh>> Something wrong..."
+    }
+    return false
 }
 
 // ------------------------------------
@@ -812,6 +825,35 @@ def sendCommandToActivity_response(resp) {
     def body = new groovy.json.JsonSlurper().parseText(parseLanMessage(resp.description).body)
     log.debug("sendCommandToActivity_response >> $body")
 }
+
+// getCurrentActivity
+// parameter :
+// return : 'getCurrentActivity_response()' method callback
+def getCurrentActivity() {
+    log.debug "getCurrentActivity"
+    sendHubCommand(getHubAction(atomicState.harmonyApiServerIP, "/hubs/$atomicState.hub/status", "getCurrentActivity_response"))
+}
+
+def getCurrentActivity_response(resp) {
+    def result = []
+
+    if (resp.description != null && parseLanMessage(resp.description).body) {
+        log.debug "getCurrentActivity_response>> response: $resp.description"
+        def body = new groovy.json.JsonSlurper().parseText(parseLanMessage(resp.description).body)
+
+        if (body && body.off != null) {
+            log.debug "getCurrentActivity_response>> $body.off"
+            if (body.off == false) {
+                atomicState.currentActivity = body.currentActivity.label
+            }
+        } else {
+            log.debug "getCurrentActivity_response>> Status error"
+        }
+    } else {
+        log.debug "getCurrentActivity_response>> Status error"
+    }
+}
+
 // getHubStatus
 // parameter :
 // return : 'getHubStatus_response()' method callback
