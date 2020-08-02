@@ -57,89 +57,89 @@ metadata {
     }
 
     tiles (scale: 2){
-        StandardTile ("actionFlat", "device.switch", width: 2, height: 2, decoration: "flat") {
+        standardTile ("actionFlat", "device.switch", width: 2, height: 2, decoration: "flat") {
             state "off", label: '${currentValue}', action: "switch.on", icon: "st.switches.switch.off", backgroundColor: "#ffffff", nextState:"turningOn"
             state "on", label: '${currentValue}', action: "switch.off", icon: "st.switches.switch.on", backgroundColor: "#00a0dc", nextState:"turningOff"
             state "off", label: '${currentValue}', action: "switch.on", icon: "st.switches.switch.off", backgroundColor: "#ffffff", nextState:"turningOn"
             state "on", label: '${currentValue}', action: "switch.off", icon: "st.switches.switch.on", backgroundColor: "#00a0dc", nextState:"turningOff"
         }
 
-        StandardTile ("volup", "device.volup", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+        standardTile ("volup", "device.volup", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "+\nVOLUME", action: "volup"
             state "no", label: "unavail", action: ""
         }
-        StandardTile ("chup", "device.chup", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+        standardTile ("chup", "device.chup", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "∧\nCHANNEL", action: "chup"
             state "no", label: "unavail", action: ""
         }
 
-        StandardTile ("mute", "device.mute", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+        standardTile ("mute", "device.mute", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "MUTE", action: "mute"
             state "no", label: "unavail", action: ""
         }
-        StandardTile ("voldown", "device.voldown", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+        standardTile ("voldown", "device.voldown", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "VOLUME\n-", action: "voldown"
             state "no", label: "unavail", action: ""
         }
-        StandardTile ("chdown", "device.chdown", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+        standardTile ("chdown", "device.chdown", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "CHANNEL\n∨", action: "chdown"
             state "no", label: "unavail", action: ""
         }
 
-        StandardTile ("menu", "device.menu", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+        standardTile ("menu", "device.menu", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "MENU", action: "menu"
             state "no", label: "unavail", action: ""
         }
-        StandardTile ("home", "device.home", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+        standardTile ("home", "device.home", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "HOME", action: "home"
             state "no", label: "unavail", action: ""
         }
-        StandardTile ("input", "device.input", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+        standardTile ("input", "device.input", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "INPUT", action: "input"
             state "no", label: "unavail", action: ""
         }
 
-        StandardTile ("number_1", "device.number_1", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+        standardTile ("number_1", "device.number_1", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "1", action: "number_1"
             state "no", label: "unavail", action: ""
         }
-        StandardTile ("number_2", "device.number_2", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+        standardTile ("number_2", "device.number_2", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "2", action: "number_2"
             state "no", label: "unavail", action: ""
         }
-        StandardTile ("number_3", "device.number_3", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+        standardTile ("number_3", "device.number_3", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "3", action: "number_3"
             state "no", label: "unavail", action: ""
         }
-        StandardTile ("number_4", "device.number_4", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+        standardTile ("number_4", "device.number_4", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "4", action: "number_4"
             state "no", label: "unavail", action: ""
         }
-        StandardTile ("number_5", "device.number_5", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+        standardTile ("number_5", "device.number_5", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "5", action: "number_5"
             state "no", label: "unavail", action: ""
         }
-        StandardTile ("number_6", "device.number_6", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+        standardTile ("number_6", "device.number_6", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "6", action: "number_6"
             state "no", label: "unavail", action: ""
         }
-        StandardTile ("number_7", "device.number_7", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+        standardTile ("number_7", "device.number_7", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "7", action: "number_7"
             state "no", label: "unavail", action: ""
         }
-        StandardTile ("number_8", "device.number_8", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+        standardTile ("number_8", "device.number_8", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "8", action: "number_8"
             state "no", label: "unavail", action: ""
         }
-        StandardTile ("number_9", "device.number_9", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+        standardTile ("number_9", "device.number_9", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "9", action: "number_9"
             state "no", label: "unavail", action: ""
         }
-        StandardTile ("back", "device.back", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+        standardTile ("back", "device.back", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "BACK", action: "back"
             state "no", label: "unavail", action: ""
         }
-        StandardTile ("number_0", "device.number_0", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
+        standardTile ("number_0", "device.number_0", width: 2, height: 1, decoration: "flat", canChangeIcon: false, canChangeBackground: false) {
             state "yes", label: "0", action: "number_0"
             state "no", label: "unavail", action: ""
         }
