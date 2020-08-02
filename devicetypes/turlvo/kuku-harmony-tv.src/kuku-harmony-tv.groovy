@@ -26,7 +26,6 @@ metadata {
         capability "Configuration"
         capability "Health Check"
 
-        command "power"
         command "volup"
         command "chup"
         command "mute"

@@ -26,7 +26,6 @@ metadata {
         capability "Configuration"
         capability "Health Check"
 
-        command "power"
         command "tempup"
         command "mode"
         command "jetcool"
