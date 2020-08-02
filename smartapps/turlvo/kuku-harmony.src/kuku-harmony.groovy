@@ -843,8 +843,8 @@ def getCurrentActivity_response(resp) {
 
         if (body && body.off != null) {
             log.debug "getCurrentActivity_response>> $body.off"
-            if (body.off == false) {
-                atomicState.currentActivity = body.currentActivity.label
+            if (body.off == false && body.current_activity != null) {
+                atomicState.currentActivity = body.current_activity.label
             }
         } else {
             log.debug "getCurrentActivity_response>> Status error"
